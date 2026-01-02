@@ -1,35 +1,34 @@
-const jwt = require("jsonwebtoken");
+const jwt = require('jsonwebtoken');
 
-const generateToken = (user) => {
+// Generate JWT token
+const generateToken = (userId) => {
   return jwt.sign(
-    { id: user._id, role: user.role },
+    { id: userId },
     process.env.JWT_SECRET,
-    { expiresIn: "1d" }
+    { expiresIn: process.env.JWT_EXPIRE || '7d' }
   );
 };
 
-const verifyToken = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "Unauthorized" });
-  }
-  const token = authHeader.split(" ")[1];
+// Verify JWT token
+const verifyToken = (token) => {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
-    next();
-  } catch (err) {
-    return res.status(401).json({ message: "Invalid token" });
+    return jwt.verify(token, process.env.JWT_SECRET);
+  } catch (error) {
+    throw new Error('Invalid token');
   }
 };
 
-const authorizeRoles = (...roles) => {
-  return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
-      return res.status(403).json({ message: "Forbidden" });
-    }
-    next();
-  };
+// Generate refresh token (optional - for future implementation)
+const generateRefreshToken = (userId) => {
+  return jwt.sign(
+    { id: userId, type: 'refresh' },
+    process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET,
+    { expiresIn: '30d' }
+  );
 };
 
-module.exports = { generateToken, verifyToken, authorizeRoles };
+module.exports = {
+  generateToken,
+  verifyToken,
+  generateRefreshToken
+};
