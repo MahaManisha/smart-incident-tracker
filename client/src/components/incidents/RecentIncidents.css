@@ -1,0 +1,53 @@
+.recent-incidents {
+  width: 100%;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.section-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.incident-number {
+  font-family: 'Courier New', monospace;
+  font-weight: var(--font-weight-medium);
+  color: var(--primary-color);
+}
+
+.incident-title {
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+}
+
+.incident-time {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+/* Hover effect for table rows */
+.table tbody tr {
+  transition: background-color var(--transition-fast);
+}
+
+.table tbody tr:hover {
+  background-color: var(--gray-50);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .table-container {
+    overflow-x: auto;
+  }
+
+  .table {
+    min-width: 600px;
+  }
+}

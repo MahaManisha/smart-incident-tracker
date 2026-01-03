@@ -1,0 +1,60 @@
+.incidents-page {
+  padding: var(--spacing-xl) 0;
+}
+
+.filters-container {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+  flex-wrap: wrap;
+  background: var(--bg-primary);
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.filter-group {
+  flex: 1;
+  min-width: 200px;
+}
+
+.incident-number {
+  font-family: 'Courier New', monospace;
+  font-weight: var(--font-weight-medium);
+  color: var(--primary-color);
+  font-size: var(--font-size-sm);
+}
+
+.incident-title {
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+}
+
+.incident-time {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.pagination-info {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .filters-container {
+    flex-direction: column;
+  }
+
+  .filter-group {
+    width: 100%;
+  }
+
+  .table-container {
+    overflow-x: auto;
+  }
+
+  .table {
+    min-width: 800px;
+  }
+}
