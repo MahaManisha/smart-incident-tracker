@@ -1,107 +1,38 @@
 const express = require('express');
 const router = express.Router();
+const { verifyToken, authorize } = require('../middleware/auth');
 const {
-  createTeam,
   getAllTeams,
   getTeamById,
+  createTeam,
   updateTeam,
   deleteTeam,
-  addMemberToTeam,
-  removeMemberFromTeam,
-  getTeamIncidents,
-  getTeamStats
+  addTeamMember,
+  removeTeamMember,
 } = require('../controllers/teamController');
-const { verifyToken, isAdmin } = require('../middleware/auth');
-const { teamValidation, validate, paramValidation } = require('../middleware/validation');
-const { auditMiddleware } = require('../middleware/auditLogger');
 
-// Create team - Admin only
-router.post(
-  '/',
-  verifyToken,
-  isAdmin,
-  teamValidation.create,
-  validate,
-  auditMiddleware('Created Team'),
-  createTeam
-);
+// Apply authentication to all routes
+router.use(verifyToken);
 
-// Get all teams - All authenticated users
-router.get(
-  '/',
-  verifyToken,
-  getAllTeams
-);
+// GET /api/teams - Get all teams
+router.get('/', authorize('ADMIN', 'RESPONDER'), getAllTeams);
 
-// Get team by ID
-router.get(
-  '/:id',
-  verifyToken,
-  paramValidation.mongoId,
-  validate,
-  getTeamById
-);
+// GET /api/teams/:id - Get single team
+router.get('/:id', authorize('ADMIN', 'RESPONDER'), getTeamById);
 
-// Update team - Admin only
-router.put(
-  '/:id',
-  verifyToken,
-  isAdmin,
-  paramValidation.mongoId,
-  teamValidation.update,
-  validate,
-  auditMiddleware('Updated Team'),
-  updateTeam
-);
+// POST /api/teams - Create new team
+router.post('/', authorize('ADMIN'), createTeam);
 
-// Delete team - Admin only
-router.delete(
-  '/:id',
-  verifyToken,
-  isAdmin,
-  paramValidation.mongoId,
-  validate,
-  auditMiddleware('Deleted Team'),
-  deleteTeam
-);
+// PATCH /api/teams/:id - Update team
+router.patch('/:id', authorize('ADMIN'), updateTeam);
 
-// Add member to team - Admin only
-router.post(
-  '/:id/members',
-  verifyToken,
-  isAdmin,
-  paramValidation.mongoId,
-  teamValidation.addMember,
-  validate,
-  auditMiddleware('Added Team Member'),
-  addMemberToTeam
-);
+// DELETE /api/teams/:id - Delete team
+router.delete('/:id', authorize('ADMIN'), deleteTeam);
 
-// Remove member from team - Admin only
-router.delete(
-  '/:id/members/:userId',
-  verifyToken,
-  isAdmin,
-  auditMiddleware('Removed Team Member'),
-  removeMemberFromTeam
-);
+// POST /api/teams/:id/members - Add member to team
+router.post('/:id/members', authorize('ADMIN'), addTeamMember);
 
-// Get team incidents
-router.get(
-  '/:id/incidents',
-  verifyToken,
-  paramValidation.mongoId,
-  validate,
-  getTeamIncidents
-);
-
-// Get team statistics
-router.get(
-  '/:id/stats',
-  verifyToken,
-  paramValidation.mongoId,
-  validate,
-  getTeamStats
-);
+// DELETE /api/teams/:id/members/:userId - Remove member from team
+router.delete('/:id/members/:userId', authorize('ADMIN'), removeTeamMember);
 
 module.exports = router;

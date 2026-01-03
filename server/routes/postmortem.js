@@ -8,7 +8,7 @@ const {
   updatePostmortem,
   markPostmortemReviewed,
   deletePostmortem
-} = require('../controllers/postmortemController');
+} = require('../controllers/postmortemController'); // ❌ REMOVED .default
 const { verifyToken, isAdmin, isResponderOrAdmin } = require('../middleware/auth');
 const { postmortemValidation, validate, paramValidation, queryValidation } = require('../middleware/validation');
 const { auditMiddleware } = require('../middleware/auditLogger');

@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
-// Verify JWT token
+// Verify JWT token (Main authentication middleware)
 const verifyToken = async (req, res, next) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
@@ -33,6 +33,9 @@ const verifyToken = async (req, res, next) => {
     res.status(500).json({ message: 'Authentication error', error: error.message });
   }
 };
+
+// Alias for authenticate (for compatibility)
+const authenticate = verifyToken;
 
 // Role-based authorization
 const authorize = (...roles) => {
@@ -69,6 +72,7 @@ const isResponderOrAdmin = (req, res, next) => {
 
 module.exports = {
   verifyToken,
+  authenticate,  // Added for compatibility with routes that use authenticate
   authorize,
   isAdmin,
   isResponderOrAdmin
