@@ -2,7 +2,7 @@ import { createContext, useState, useContext, useEffect } from 'react';
 import { login as loginApi, getCurrentUser } from '../api/authApi';
 import { toast } from 'react-toastify';
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -14,40 +14,50 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [token, setToken] = useState(() => localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Load user on mount if token exists
+  // 🔐 Load user once on app start
   useEffect(() => {
-    const loadUser = async () => {
-      if (token) {
-        try {
-          const response = await getCurrentUser();
-          setUser(response.user);
-          setIsAuthenticated(true);
-        } catch (error) {
-          console.error('Failed to load user:', error);
-          logout();
-        }
+    const initAuth = async () => {
+      const storedToken = localStorage.getItem('token');
+
+      if (!storedToken) {
+        setLoading(false);
+        return;
       }
-      setLoading(false);
+
+      try {
+        setLoading(true);
+        const response = await getCurrentUser();
+        setUser(response.user);
+        setIsAuthenticated(true);
+      } catch (error) {
+        console.error('Auth init failed:', error);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setUser(null);
+        setIsAuthenticated(false);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    loadUser();
-  }, [token]);
+    initAuth();
+  }, []);
 
-  // Login function
+  // 🔑 Login
   const login = async (credentials) => {
     try {
+      setLoading(true);
+
       const response = await loginApi(credentials);
       const { token: newToken, user: userData } = response;
 
-      // Store in localStorage
       localStorage.setItem('token', newToken);
       localStorage.setItem('user', JSON.stringify(userData));
 
-      // Update state
       setToken(newToken);
       setUser(userData);
       setIsAuthenticated(true);
@@ -56,47 +66,46 @@ export const AuthProvider = ({ children }) => {
       return { success: true };
     } catch (error) {
       toast.error(error.message || 'Login failed');
-      return { success: false, error: error.message };
+      return { success: false };
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Logout function
+  // 🚪 Logout
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setToken(null);
     setUser(null);
     setIsAuthenticated(false);
+    setLoading(false);
     toast.success('Logged out successfully');
   };
 
-  // Update user data
   const updateUser = (userData) => {
     setUser(userData);
     localStorage.setItem('user', JSON.stringify(userData));
   };
 
-  // Check if user has specific role
-  const hasRole = (role) => {
-    return user?.role === role;
-  };
+  const hasRole = (role) => user?.role === role;
+  const hasAnyRole = (roles) => roles.includes(user?.role);
 
-  // Check if user has any of the roles
-  const hasAnyRole = (roles) => {
-    return roles.includes(user?.role);
-  };
-
-  const value = {
-    user,
-    token,
-    loading,
-    isAuthenticated,
-    login,
-    logout,
-    updateUser,
-    hasRole,
-    hasAnyRole,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        loading,
+        isAuthenticated,
+        login,
+        logout,
+        updateUser,
+        hasRole,
+        hasAnyRole,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 };

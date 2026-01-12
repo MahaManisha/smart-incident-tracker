@@ -13,19 +13,13 @@ import NotFoundPage from './pages/NotFoundPage';
 function App() {
   return (
     <Routes>
-      {/* Public Routes */}
+      {/* Public Route */}
       <Route path="/login" element={<LoginPage />} />
 
-      {/* Protected Routes */}
-      <Route
-        path="/"
-        element={
-          <PrivateRoute>
-            <Navigate to="/dashboard" replace />
-          </PrivateRoute>
-        }
-      />
+      {/* Default Redirect */}
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
+      {/* Protected Routes */}
       <Route
         path="/dashboard"
         element={
@@ -71,7 +65,7 @@ function App() {
         }
       />
 
-      {/* 404 Page */}
+      {/* 404 */}
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );

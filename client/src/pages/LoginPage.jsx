@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { validateLoginForm } from '../utils/validators';
@@ -8,6 +8,7 @@ import './LoginPage.css';
 const LoginPage = () => {
   const navigate = useNavigate();
   const { login, isAuthenticated } = useAuth();
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -15,19 +16,21 @@ const LoginPage = () => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
-  // Redirect if already authenticated
-  if (isAuthenticated) {
-    navigate('/dashboard');
-    return null;
-  }
+  // ✅ Redirect AFTER render (correct way)
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
-    // Clear error for this field
+
     if (errors[name]) {
       setErrors((prev) => ({
         ...prev,
@@ -39,19 +42,22 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate form
-    const { isValid, errors: validationErrors } = validateLoginForm(formData);
+    const { isValid, errors: validationErrors } =
+      validateLoginForm(formData);
+
     if (!isValid) {
       setErrors(validationErrors);
       return;
     }
 
     setLoading(true);
+
     const result = await login(formData);
+
     setLoading(false);
 
-    if (result.success) {
-      navigate('/dashboard');
+    if (result?.success) {
+      navigate('/dashboard', { replace: true });
     }
   };
 
@@ -79,7 +85,9 @@ const LoginPage = () => {
               onChange={handleChange}
               disabled={loading}
             />
-            {errors.email && <span className="form-error">{errors.email}</span>}
+            {errors.email && (
+              <span className="form-error">{errors.email}</span>
+            )}
           </div>
 
           <div className="form-group">
