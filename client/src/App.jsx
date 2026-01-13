@@ -8,12 +8,13 @@ import IncidentsPage from './pages/IncidentsPage';
 import IncidentDetailPage from './pages/IncidentDetailPage';
 import CreateIncidentPage from './pages/CreateIncidentPage';
 import UsersPage from './pages/UsersPage';
+import ProfilePage from './pages/Profile';
 import NotFoundPage from './pages/NotFoundPage';
 
 function App() {
   return (
     <Routes>
-      {/* Public Route */}
+      {/* Public Routes */}
       <Route path="/login" element={<LoginPage />} />
 
       {/* Default Redirect */}
@@ -25,6 +26,15 @@ function App() {
         element={
           <PrivateRoute>
             <DashboardPage />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/profile"
+        element={
+          <PrivateRoute>
+            <ProfilePage />
           </PrivateRoute>
         }
       />
@@ -65,7 +75,7 @@ function App() {
         }
       />
 
-      {/* 404 */}
+      {/* 404 Not Found */}
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );

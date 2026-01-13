@@ -49,6 +49,12 @@ const Sidebar = ({ isOpen }) => {
       label: 'SLA Config',
       roles: [USER_ROLES.ADMIN],
     },
+    {
+      path: '/profile',
+      icon: '👤',
+      label: 'Profile',
+      roles: [USER_ROLES.ADMIN, USER_ROLES.RESPONDER, USER_ROLES.REPORTER],
+    },
   ];
 
   return (

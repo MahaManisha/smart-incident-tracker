@@ -14,6 +14,10 @@ const { verifyToken, isAdmin } = require('../middleware/auth');
 const { userValidation, validate, paramValidation, queryValidation } = require('../middleware/validation');
 const { auditMiddleware } = require('../middleware/auditLogger');
 
+// --------------------
+// Routes
+// --------------------
+
 // Get all users - Admin only
 router.get(
   '/',
@@ -24,7 +28,7 @@ router.get(
   getAllUsers
 );
 
-// Update own profile - All authenticated users
+// Update own profile - Authenticated user
 router.put(
   '/profile',
   verifyToken,
@@ -33,13 +37,22 @@ router.put(
   updateProfile
 );
 
-// Change password - All authenticated users
+// Change password - Authenticated user
 router.post(
   '/change-password',
   verifyToken,
   userValidation.changePassword,
   validate,
   changePassword
+);
+
+// Get user stats - Admin or self
+router.get(
+  '/:id/stats',
+  verifyToken,
+  paramValidation.mongoId,
+  validate,
+  getUserStats
 );
 
 // Get user by ID - Admin or self
@@ -83,15 +96,6 @@ router.delete(
   validate,
   auditMiddleware('Deleted User'),
   deleteUser
-);
-
-// Get user stats - Admin or self
-router.get(
-  '/:id/stats',
-  verifyToken,
-  paramValidation.mongoId,
-  validate,
-  getUserStats
 );
 
 module.exports = router;

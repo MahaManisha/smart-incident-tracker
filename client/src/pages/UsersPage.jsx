@@ -40,15 +40,21 @@ const UsersPage = () => {
     setShowModal(true);
   };
 
+  // ✅ FIXED DELETE LOGIC (no refetch, no race condition)
   const handleDeleteUser = async (userId) => {
-    if (!confirm('Are you sure you want to delete this user?')) {
+    if (!window.confirm('Are you sure you want to delete this user?')) {
       return;
     }
 
     try {
       await deleteUser(userId);
+
+      // Optimistically update UI
+      setUsers((prevUsers) =>
+        prevUsers.filter((user) => user._id !== userId)
+      );
+
       toast.success('User deleted successfully');
-      fetchUsers();
     } catch (error) {
       toast.error(error.message || 'Failed to delete user');
     }
@@ -62,7 +68,7 @@ const UsersPage = () => {
   const handleUserSaved = () => {
     setShowModal(false);
     setEditingUser(null);
-    fetchUsers();
+    fetchUsers(); // create/update needs fresh data
   };
 
   return (
@@ -71,7 +77,9 @@ const UsersPage = () => {
         <div className="page-header">
           <div>
             <h1 className="page-title">Users</h1>
-            <p className="page-description">Manage system users and permissions</p>
+            <p className="page-description">
+              Manage system users and permissions
+            </p>
           </div>
           <Button variant="primary" onClick={handleCreateUser}>
             ➕ Add User

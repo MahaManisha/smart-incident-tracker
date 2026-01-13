@@ -7,16 +7,19 @@ import { USER_ROLES } from '../../utils/constants';
 import { toast } from 'react-toastify';
 
 const UserModal = ({ user, isOpen, onClose, onSuccess }) => {
-  const isEditMode = !!user;
+  const isEditMode = Boolean(user);
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     role: 'REPORTER',
   });
+
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
+  // Populate form in edit mode
   useEffect(() => {
     if (user) {
       setFormData({
@@ -30,27 +33,25 @@ const UserModal = ({ user, isOpen, onClose, onSuccess }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
-    // Clear error for this field
+
     if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: '',
-      }));
+      setErrors((prev) => ({ ...prev, [name]: '' }));
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate form
     const { isValid, errors: validationErrors } = validateUserForm(
       formData,
       isEditMode
     );
+
     if (!isValid) {
       setErrors(validationErrors);
       return;
@@ -58,21 +59,31 @@ const UserModal = ({ user, isOpen, onClose, onSuccess }) => {
 
     try {
       setLoading(true);
+
       if (isEditMode) {
-        // Don't send password if it's empty in edit mode
-        const updateData = { ...formData };
-        if (!updateData.password) {
-          delete updateData.password;
+        // 🔥 Only send fields that are allowed to change
+        const updateData = {
+          name: formData.name,
+          role: formData.role,
+        };
+
+        if (formData.password) {
+          updateData.password = formData.password;
         }
+
         await updateUser(user._id, updateData);
         toast.success('User updated successfully');
       } else {
         await createUser(formData);
         toast.success('User created successfully');
       }
+
       onSuccess();
+      onClose();
     } catch (error) {
-      toast.error(error.message || 'Failed to save user');
+      toast.error(
+        error?.response?.data?.message || 'Failed to save user'
+      );
     } finally {
       setLoading(false);
     }
@@ -100,16 +111,13 @@ const UserModal = ({ user, isOpen, onClose, onSuccess }) => {
       }
     >
       <form onSubmit={handleSubmit}>
+        {/* NAME */}
         <div className="form-group">
-          <label htmlFor="name" className="form-label required">
-            Name
-          </label>
+          <label className="form-label required">Name</label>
           <input
             type="text"
-            id="name"
             name="name"
             className={`form-input ${errors.name ? 'error' : ''}`}
-            placeholder="Enter full name"
             value={formData.name}
             onChange={handleChange}
             disabled={loading}
@@ -117,56 +125,45 @@ const UserModal = ({ user, isOpen, onClose, onSuccess }) => {
           {errors.name && <span className="form-error">{errors.name}</span>}
         </div>
 
+        {/* EMAIL */}
         <div className="form-group">
-          <label htmlFor="email" className="form-label required">
-            Email
-          </label>
+          <label className="form-label required">Email</label>
           <input
             type="email"
-            id="email"
             name="email"
-            className={`form-input ${errors.email ? 'error' : ''}`}
-            placeholder="Enter email address"
+            className="form-input"
             value={formData.email}
-            onChange={handleChange}
-            disabled={loading}
+            disabled={true} // 🔒 locked in edit mode
           />
-          {errors.email && <span className="form-error">{errors.email}</span>}
         </div>
 
+        {/* PASSWORD */}
         <div className="form-group">
-          <label htmlFor="password" className="form-label required">
-            Password {isEditMode && '(leave blank to keep current)'}
+          <label className="form-label">
+            Password {isEditMode && '(optional)'}
           </label>
           <input
             type="password"
-            id="password"
             name="password"
             className={`form-input ${errors.password ? 'error' : ''}`}
-            placeholder={
-              isEditMode ? 'Enter new password (optional)' : 'Enter password'
-            }
             value={formData.password}
             onChange={handleChange}
             disabled={loading}
+            placeholder={
+              isEditMode
+                ? 'Leave blank to keep current password'
+                : 'Enter password'
+            }
           />
           {errors.password && (
             <span className="form-error">{errors.password}</span>
           )}
-          {!isEditMode && (
-            <span className="form-help">
-              Password must be at least 8 characters with uppercase, lowercase,
-              and number
-            </span>
-          )}
         </div>
 
+        {/* ROLE */}
         <div className="form-group">
-          <label htmlFor="role" className="form-label required">
-            Role
-          </label>
+          <label className="form-label required">Role</label>
           <select
-            id="role"
             name="role"
             className={`form-select ${errors.role ? 'error' : ''}`}
             value={formData.role}

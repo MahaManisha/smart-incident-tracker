@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 
-// Load env vars FIRST
+// Load environment variables first
 dotenv.config();
 
 // Core imports
@@ -10,10 +10,20 @@ const connectDB = require("./config/database");
 const { errorHandler, notFound } = require("./middleware/errorHandler");
 const { startSLAChecker, startDailySummaryJob } = require("./jobs/slaChecker");
 
-// Initialize app
+// Route imports
+const authRoutes = require("./routes/auth");
+const userRoutes = require("./routes/user");
+const incidentRoutes = require("./routes/incident");
+const slaRoutes = require("./routes/sla");
+const teamRoutes = require("./routes/team");
+const analyticsRoutes = require("./routes/analytics");
+const postmortemRoutes = require("./routes/postmortem");
+const notificationRoutes = require("./routes/notification");
+
+// Initialize Express
 const app = express();
 
-// Connect DB before anything else
+// Connect to MongoDB
 connectDB();
 
 // Middleware
@@ -29,7 +39,7 @@ if (process.env.NODE_ENV === "development") {
   });
 }
 
-// Health check
+// Health check endpoint
 app.get("/health", (req, res) => {
   res.status(200).json({
     status: "OK",
@@ -38,15 +48,15 @@ app.get("/health", (req, res) => {
   });
 });
 
-// Routes
-app.use("/api/auth", require("./routes/auth"));
-app.use("/api/incidents", require("./routes/incident"));
-app.use("/api/sla", require("./routes/sla"));
-app.use("/api/teams", require("./routes/team"));
-app.use("/api/users", require("./routes/user"));
-app.use("/api/analytics", require("./routes/analytics"));
-app.use("/api/postmortems", require("./routes/postmortem"));
-app.use("/api/notifications", require("./routes/notification"));
+// API Routes
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes); // Make sure userRoutes points to './routes/user.js'
+app.use("/api/incidents", incidentRoutes);
+app.use("/api/sla", slaRoutes);
+app.use("/api/teams", teamRoutes);
+app.use("/api/analytics", analyticsRoutes);
+app.use("/api/postmortems", postmortemRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 // 404 handler
 app.use(notFound);
@@ -54,7 +64,7 @@ app.use(notFound);
 // Global error handler
 app.use(errorHandler);
 
-// Start background jobs ONLY after server boots
+// Start background jobs after server starts
 const startBackgroundJobs = () => {
   startSLAChecker();
   startDailySummaryJob();
@@ -72,13 +82,13 @@ const server = app.listen(PORT, () => {
   startBackgroundJobs();
 });
 
-// Unhandled promise rejection
+// Handle unhandled promise rejections
 process.on("unhandledRejection", (err) => {
   console.error("❌ Unhandled Promise Rejection:", err);
   server.close(() => process.exit(1));
 });
 
-// Uncaught exception
+// Handle uncaught exceptions
 process.on("uncaughtException", (err) => {
   console.error("❌ Uncaught Exception:", err);
   process.exit(1);

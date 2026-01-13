@@ -19,9 +19,9 @@ export const createUser = async (userData) => {
   return response;
 };
 
-// Update user
+// ✅ FIXED: Update user (PUT, not PATCH)
 export const updateUser = async (id, userData) => {
-  const response = await axiosInstance.patch(`/users/${id}`, userData);
+  const response = await axiosInstance.put(`/users/${id}`, userData);
   return response;
 };
 
@@ -33,12 +33,12 @@ export const deleteUser = async (id) => {
 
 // Get users by role
 export const getUsersByRole = async (role) => {
-  const response = await axiosInstance.get(`/users/role/${role}`);
+  const response = await axiosInstance.get(`/users?role=${role}`);
   return response;
 };
 
-// Get responders (for assignment)
+// Get responders
 export const getResponders = async () => {
-  const response = await axiosInstance.get('/users/responders');
+  const response = await axiosInstance.get('/users?role=RESPONDER');
   return response;
 };
