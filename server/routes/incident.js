@@ -1,75 +1,86 @@
 const express = require('express');
 const router = express.Router();
 const {
-  createSLARule,
-  getAllSLARules,
-  getSLARuleById,
-  updateSLARule,
-  deleteSLARule,
-  getSLACompliance
-} = require('../controllers/slaController');
+  createIncident,
+  getAllIncidents,
+  getIncidentById,
+  assignIncident,
+  updateIncidentStatus,
+  addComment
+} = require('../controllers/incidentController');
 const { verifyToken, isAdmin } = require('../middleware/auth');
-const { slaValidation, validate, paramValidation, queryValidation } = require('../middleware/validation');
+const { incidentValidation, validate, paramValidation } = require('../middleware/validation');
 const { auditMiddleware } = require('../middleware/auditLogger');
 
-// Create SLA rule - Admin only
+// ============================================
+// CREATE INCIDENT - ADMIN, REPORTER (any authenticated user can create)
+// ============================================
 router.post(
   '/',
-  verifyToken,
-  isAdmin,
-  slaValidation.create,
-  validate,
-  auditMiddleware('Created SLA Rule'),
-  createSLARule
+  verifyToken,                    // 1. Authentication FIRST
+  incidentValidation.create,      // 2. Validation rules
+  validate,                       // 3. Validation checker
+  createIncident                  // 4. Controller
 );
 
-// Get all SLA rules - All authenticated users
+// ============================================
+// GET ALL INCIDENTS - All authenticated users
+// ============================================
 router.get(
   '/',
   verifyToken,
-  getAllSLARules
+  getAllIncidents
 );
 
-// Get SLA compliance report - Admin only
-router.get(
-  '/compliance',
-  verifyToken,
-  isAdmin,
-  queryValidation.dateRange,
-  validate,
-  getSLACompliance
-);
-
-// Get SLA rule by ID
+// ============================================
+// GET INCIDENT BY ID
+// ============================================
 router.get(
   '/:id',
   verifyToken,
   paramValidation.mongoId,
   validate,
-  getSLARuleById
+  getIncidentById
 );
 
-// Update SLA rule - Admin only
+// ============================================
+// ASSIGN INCIDENT - Admin only
+// ============================================
 router.put(
-  '/:id',
+  '/:id/assign',
   verifyToken,
   isAdmin,
   paramValidation.mongoId,
-  slaValidation.update,
+  incidentValidation.assign,
   validate,
-  auditMiddleware('Updated SLA Rule'),
-  updateSLARule
+  auditMiddleware('Assigned Incident'),
+  assignIncident
 );
 
-// Delete SLA rule - Admin only
-router.delete(
-  '/:id',
+// ============================================
+// UPDATE INCIDENT STATUS - Responder or Admin
+// ============================================
+router.put(
+  '/:id/status',
   verifyToken,
-  isAdmin,
   paramValidation.mongoId,
+  incidentValidation.updateStatus,
   validate,
-  auditMiddleware('Deleted SLA Rule'),
-  deleteSLARule
+  auditMiddleware('Updated Incident Status'),
+  updateIncidentStatus
+);
+
+// ============================================
+// ADD COMMENT TO INCIDENT
+// ============================================
+router.post(
+  '/:id/comments',
+  verifyToken,
+  paramValidation.mongoId,
+  incidentValidation.addComment,
+  validate,
+  auditMiddleware('Added Comment'),
+  addComment
 );
 
 module.exports = router;

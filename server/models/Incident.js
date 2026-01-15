@@ -1,22 +1,60 @@
 const mongoose = require("mongoose");
 
-const incidentSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  description: { type: String, required: true },
-  severity: { type: String, enum: ["LOW", "MEDIUM", "HIGH", "CRITICAL"], required: true },
-  status: { type: String, enum: ["OPEN", "INVESTIGATING", "RESOLVED"], default: "OPEN" },
-  reporter: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  responder: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
-  teamId: { type: mongoose.Schema.Types.ObjectId, ref: "Team", default: null },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
-  slaDue: { type: Date, required: true }
-});
+const incidentSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: true,
+      trim: true
+    },
 
-// Optional: auto-update updatedAt
-incidentSchema.pre("save", function (next) {
-  this.updatedAt = Date.now();
-  next();
-});
+    description: {
+      type: String,
+      required: true,
+      trim: true
+    },
+
+    severity: {
+      type: String,
+      enum: ["LOW", "MEDIUM", "HIGH", "CRITICAL"],
+      required: true
+    },
+
+    status: {
+      type: String,
+      enum: ["OPEN", "INVESTIGATING", "RESOLVED"],
+      default: "OPEN"
+    },
+
+    // User who CREATED the incident (admin / reporter / responder)
+    reportedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true
+    },
+
+    reportedByRole: {
+      type: String,
+      enum: ["ADMIN", "REPORTER", "RESPONDER"],
+      required: true
+    },
+
+    // User who is HANDLING the incident
+    assignedTo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null
+    },
+
+    // SLA calculated by system, not user
+    slaDue: {
+      type: Date,
+      default: null
+    }
+  },
+  {
+    timestamps: true
+  }
+);
 
 module.exports = mongoose.model("Incident", incidentSchema);

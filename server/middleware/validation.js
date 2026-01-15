@@ -1,9 +1,11 @@
 const { body, param, query, validationResult } = require('express-validator');
 
-// Validation result checker
+// Validation result checker with detailed error logging
 const validate = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    console.error('Validation Errors:', JSON.stringify(errors.array(), null, 2));
+    console.error('Request Body:', JSON.stringify(req.body, null, 2));
     return res.status(400).json({ 
       message: 'Validation failed', 
       errors: errors.array() 
@@ -12,7 +14,7 @@ const validate = (req, res, next) => {
   next();
 };
 
-// Incident validations
+// Incident validations - SIMPLIFIED VERSION
 const incidentValidation = {
   create: [
     body('title')
@@ -31,6 +33,7 @@ const incidentValidation = {
     body('impactedUsers')
       .optional()
       .isInt({ min: 0 }).withMessage('Impacted users must be a positive number')
+    // REMOVED ALL .not().exists() CHECKS - They were too strict
   ],
 
   update: [
