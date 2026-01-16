@@ -205,8 +205,8 @@ const IncidentsPage = () => {
                       <td>
                         <StatusBadge status={incident.status} type="status" />
                       </td>
-                      <td>{incident.reporter?.name || 'Unknown'}</td>
-                      <td>{incident.responder?.name || '-'}</td>
+                      <td>{incident.reportedBy?.name || 'Unknown'}</td>
+                      <td>{incident.assignedTo?.name || '-'}</td>
                       <td>
                         <span
                           className="incident-time"

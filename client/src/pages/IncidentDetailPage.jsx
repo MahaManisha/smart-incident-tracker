@@ -122,7 +122,7 @@ const IncidentDetailPage = () => {
           <div className="incident-sidebar">
             {/* Actions */}
             {(hasRole(USER_ROLES.ADMIN) ||
-              incident.responder?._id === user?._id) && (
+              (incident.assignedTo && incident.assignedTo._id === user?._id)) && (
               <IncidentActions
                 incident={incident}
                 onUpdate={handleIncidentUpdated}
@@ -139,15 +139,15 @@ const IncidentDetailPage = () => {
                   <div className="detail-item">
                     <span className="detail-label">Reporter</span>
                     <span className="detail-value">
-                      {formatUserName(incident.reporter)}
+                      {incident.reportedBy?.name || 'Unknown'}
                     </span>
                   </div>
 
                   <div className="detail-item">
                     <span className="detail-label">Responder</span>
                     <span className="detail-value">
-                      {incident.responder
-                        ? formatUserName(incident.responder)
+                      {incident.assignedTo
+                        ? incident.assignedTo.name
                         : 'Unassigned'}
                     </span>
                   </div>
@@ -173,7 +173,7 @@ const IncidentDetailPage = () => {
                     </span>
                   </div>
 
-                  {incident.slaDeadline && (
+                  {incident.slaDue && (
                     <div className="detail-item">
                       <span className="detail-label">SLA Deadline</span>
                       <span

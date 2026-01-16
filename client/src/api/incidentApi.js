@@ -31,17 +31,17 @@ export const deleteIncident = async (id) => {
   return response;
 };
 
-// Assign incident to responder
+// ✅ FIX: Changed from PATCH to PUT to match backend route
 export const assignIncident = async (id, responderId) => {
-  const response = await axiosInstance.patch(`/incidents/${id}/assign`, {
+  const response = await axiosInstance.put(`/incidents/${id}/assign`, {
     responderId,
   });
   return response;
 };
 
-// Update incident status
+// ✅ FIX: Changed from PATCH to PUT to match backend route
 export const updateIncidentStatus = async (id, status, notes) => {
-  const response = await axiosInstance.patch(`/incidents/${id}/status`, {
+  const response = await axiosInstance.put(`/incidents/${id}/status`, {
     status,
     notes,
   });

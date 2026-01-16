@@ -1,7 +1,5 @@
 const Incident = require('../models/Incident');
 const User = require('../models/user');
-// const Comment = require('../models/Comment'); // REMOVED - Model doesn't exist
-// const Escalation = require('../models/Escalation'); // REMOVED - Model doesn't exist
 const { calculateSLADeadline } = require('../services/slaService');
 const {
   notifyIncidentCreated,
@@ -14,6 +12,7 @@ const { logAudit } = require('../middleware/auditLogger');
 
 /* ============================
    CREATE INCIDENT
+   ✅ FIXED: Now always sets reportedBy from req.user.id
 ============================ */
 const createIncident = async (req, res) => {
   try {
@@ -25,21 +24,22 @@ const createIncident = async (req, res) => {
     // Calculate SLA deadline based on severity
     const slaDue = await calculateSLADeadline(severity, reportedAt);
 
-    // Create incident with all required fields
+    // ✅ FIX: Always populate reportedBy from authenticated user
     const incident = await Incident.create({
       title,
       description,
       severity,
-      reportedBy: req.user.id, // Works for ADMIN, REPORTER, or any role
-      reportedByRole: req.user.role, // ADMIN, REPORTER, or RESPONDER
+      reportedBy: req.user.id,           // ✅ ALWAYS SET FROM AUTHENTICATED USER
+      reportedByRole: req.user.role,     // ✅ ALWAYS SET FROM AUTHENTICATED USER
       reportedAt,
       slaDue,
-      status: 'OPEN', // Initial status
+      status: 'OPEN',                    // ✅ DEFAULT STATUS
       affectedService: affectedService || undefined,
       impactedUsers: impactedUsers || undefined
+      // ✅ NO assignedTo - will be set in assignment workflow
     });
 
-    // Populate reporter details
+    // ✅ Populate reporter details before sending response
     await incident.populate('reportedBy', 'name email role');
 
     // Log audit trail
@@ -66,6 +66,7 @@ const createIncident = async (req, res) => {
 
 /* ============================
    GET ALL INCIDENTS
+   ✅ FIXED: Now populates reportedBy correctly
 ============================ */
 const getAllIncidents = async (req, res) => {
   try {
@@ -82,9 +83,10 @@ const getAllIncidents = async (req, res) => {
 
     // ADMIN sees all incidents (no filter)
 
+    // ✅ FIX: Populate both reportedBy and assignedTo
     const incidents = await Incident.find(query)
-      .populate('reportedBy', 'name email role')
-      .populate('assignedTo', 'name email role')
+      .populate('reportedBy', 'name email role')    // ✅ POPULATE REPORTER
+      .populate('assignedTo', 'name email role')    // ✅ POPULATE RESPONDER
       .sort({ createdAt: -1 });
 
     res.json({ incidents });
@@ -95,13 +97,40 @@ const getAllIncidents = async (req, res) => {
 };
 
 /* ============================
+   GET UNASSIGNED INCIDENTS (NEW)
+   ✅ NEW: For admin assignment workflow
+============================ */
+const getUnassignedIncidents = async (req, res) => {
+  try {
+    const incidents = await Incident.find({
+      status: 'OPEN',
+      assignedTo: null
+    })
+      .populate('reportedBy', 'name email role')
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      count: incidents.length,
+      incidents
+    });
+  } catch (error) {
+    console.error('Fetch unassigned incidents error:', error);
+    res.status(500).json({ message: 'Failed to fetch unassigned incidents' });
+  }
+};
+
+/* ============================
    GET INCIDENT BY ID
+   ✅ FIXED: Now populates reportedBy correctly
 ============================ */
 const getIncidentById = async (req, res) => {
   try {
+    // ✅ FIX: Populate both reportedBy and assignedTo
     const incident = await Incident.findById(req.params.id)
       .populate('reportedBy', 'name email role')
-      .populate('assignedTo', 'name email role');
+      .populate('assignedTo', 'name email role')
+      .populate('comments.userId', 'name email role');
 
     if (!incident) {
       return res.status(404).json({ message: 'Incident not found' });
@@ -134,10 +163,16 @@ const getIncidentById = async (req, res) => {
 
 /* ============================
    ASSIGN INCIDENT
+   ✅ UPDATED: Separated from creation workflow
 ============================ */
 const assignIncident = async (req, res) => {
   try {
     const { responderId } = req.body;
+
+    // Validation
+    if (!responderId) {
+      return res.status(400).json({ message: 'Responder ID is required' });
+    }
 
     // Verify responder exists and is active
     const responder = await User.findOne({
@@ -147,7 +182,7 @@ const assignIncident = async (req, res) => {
     });
 
     if (!responder) {
-      return res.status(400).json({ message: 'Invalid responder' });
+      return res.status(400).json({ message: 'Invalid responder or responder not found' });
     }
 
     // Find incident
@@ -156,12 +191,23 @@ const assignIncident = async (req, res) => {
       return res.status(404).json({ message: 'Incident not found' });
     }
 
-    // Update incident
+    // Check if already assigned
+    if (incident.assignedTo) {
+      return res.status(400).json({ 
+        message: 'Incident is already assigned',
+        currentResponder: incident.assignedTo
+      });
+    }
+
+    // ✅ Update incident - assign responder and change status
     incident.assignedTo = responderId;
     incident.status = 'INVESTIGATING';
 
     await incident.save();
-    await incident.populate('assignedTo', 'name email');
+    
+    // Populate both fields
+    await incident.populate('assignedTo', 'name email role');
+    await incident.populate('reportedBy', 'name email role');
 
     // Log audit
     await logAudit('INCIDENT_ASSIGNED', req.user.id, incident._id, {
@@ -190,8 +236,8 @@ const updateIncidentStatus = async (req, res) => {
     const { status } = req.body;
 
     const incident = await Incident.findById(req.params.id)
-      .populate('reportedBy', 'name email')
-      .populate('assignedTo', 'name email');
+      .populate('reportedBy', 'name email role')
+      .populate('assignedTo', 'name email role');
 
     if (!incident) {
       return res.status(404).json({ message: 'Incident not found' });
@@ -238,8 +284,31 @@ const updateIncidentStatus = async (req, res) => {
 };
 
 /* ============================
+   GET COMMENTS FOR INCIDENT
+============================ */
+const getComments = async (req, res) => {
+  try {
+    const incident = await Incident.findById(req.params.id)
+      .populate('comments.userId', 'name email role');
+    
+    if (!incident) {
+      return res.status(404).json({ message: 'Incident not found' });
+    }
+
+    const comments = incident.comments || [];
+
+    res.json({ 
+      comments,
+      count: comments.length 
+    });
+  } catch (error) {
+    console.error('Get comments error:', error);
+    res.status(500).json({ message: 'Failed to load comments' });
+  }
+};
+
+/* ============================
    ADD COMMENT
-   NOTE: This stores comments directly in the Incident model's comments array
 ============================ */
 const addComment = async (req, res) => {
   try {
@@ -250,32 +319,29 @@ const addComment = async (req, res) => {
       return res.status(404).json({ message: 'Incident not found' });
     }
 
-    // Create comment object to add to incident's comments array
     const newComment = {
       userId: req.user.id,
-      userName: req.user.name, // Assuming req.user has name
+      userName: req.user.name,
       userRole: req.user.role,
       comment,
       isInternal: isInternal || false,
       createdAt: new Date()
     };
 
-    // If your Incident model has a comments array field
-    if (!incident.comments) {
-      incident.comments = [];
-    }
     incident.comments.push(newComment);
     
     await incident.save();
+    await incident.populate('comments.userId', 'name email role');
 
-    // Log audit
+    const addedComment = incident.comments[incident.comments.length - 1];
+
     await logAudit('COMMENT_ADDED', req.user.id, incident._id, {
       isInternal
     });
 
     res.status(201).json({
       message: 'Comment added',
-      comment: newComment
+      comment: addedComment
     });
   } catch (error) {
     console.error('Add comment error:', error);
@@ -286,8 +352,10 @@ const addComment = async (req, res) => {
 module.exports = {
   createIncident,
   getAllIncidents,
+  getUnassignedIncidents,    // ✅ NEW EXPORT
   getIncidentById,
   assignIncident,
   updateIncidentStatus,
+  getComments,
   addComment
 };

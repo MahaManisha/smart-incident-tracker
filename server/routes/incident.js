@@ -3,24 +3,26 @@ const router = express.Router();
 const {
   createIncident,
   getAllIncidents,
+  getUnassignedIncidents,
   getIncidentById,
   assignIncident,
   updateIncidentStatus,
-  addComment
+  addComment,
+  getComments
 } = require('../controllers/incidentController');
 const { verifyToken, isAdmin } = require('../middleware/auth');
 const { incidentValidation, validate, paramValidation } = require('../middleware/validation');
 const { auditMiddleware } = require('../middleware/auditLogger');
 
 // ============================================
-// CREATE INCIDENT - ADMIN, REPORTER (any authenticated user can create)
+// CREATE INCIDENT - ADMIN, REPORTER
 // ============================================
 router.post(
   '/',
-  verifyToken,                    // 1. Authentication FIRST
-  incidentValidation.create,      // 2. Validation rules
-  validate,                       // 3. Validation checker
-  createIncident                  // 4. Controller
+  verifyToken,
+  incidentValidation.create,
+  validate,
+  createIncident
 );
 
 // ============================================
@@ -30,6 +32,16 @@ router.get(
   '/',
   verifyToken,
   getAllIncidents
+);
+
+// ============================================
+// GET UNASSIGNED INCIDENTS - Admin only
+// ============================================
+router.get(
+  '/unassigned',
+  verifyToken,
+  isAdmin,
+  getUnassignedIncidents
 );
 
 // ============================================
@@ -45,6 +57,7 @@ router.get(
 
 // ============================================
 // ASSIGN INCIDENT - Admin only
+// ✅ FIX: This route was missing
 // ============================================
 router.put(
   '/:id/assign',
@@ -68,6 +81,17 @@ router.put(
   validate,
   auditMiddleware('Updated Incident Status'),
   updateIncidentStatus
+);
+
+// ============================================
+// GET COMMENTS FOR INCIDENT
+// ============================================
+router.get(
+  '/:id/comments',
+  verifyToken,
+  paramValidation.mongoId,
+  validate,
+  getComments
 );
 
 // ============================================
