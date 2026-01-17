@@ -8,9 +8,10 @@ const {
   assignIncident,
   updateIncidentStatus,
   addComment,
-  getComments
+  getComments,
+  getMyAssignedIncidents
 } = require('../controllers/incidentController');
-const { verifyToken, isAdmin } = require('../middleware/auth');
+const { verifyToken, isAdmin, authorize } = require('../middleware/auth');
 const { incidentValidation, validate, paramValidation } = require('../middleware/validation');
 const { auditMiddleware } = require('../middleware/auditLogger');
 
@@ -32,6 +33,17 @@ router.get(
   '/',
   verifyToken,
   getAllIncidents
+);
+
+// ============================================
+// GET MY ASSIGNED INCIDENTS - Responder only
+// ✅ NEW ROUTE FOR STEP 1
+// ============================================
+router.get(
+  '/my-assigned',
+  verifyToken,
+  authorize('RESPONDER'),
+  getMyAssignedIncidents
 );
 
 // ============================================
@@ -57,7 +69,6 @@ router.get(
 
 // ============================================
 // ASSIGN INCIDENT - Admin only
-// ✅ FIX: This route was missing
 // ============================================
 router.put(
   '/:id/assign',

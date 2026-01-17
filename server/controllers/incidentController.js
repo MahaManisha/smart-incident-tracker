@@ -97,6 +97,67 @@ const getAllIncidents = async (req, res) => {
 };
 
 /* ============================
+   GET MY ASSIGNED INCIDENTS (RESPONDER ONLY)
+   ✅ NEW: STEP 1 - My Incidents for Responder
+============================ */
+const getMyAssignedIncidents = async (req, res) => {
+  try {
+    const { status, severity, page = 1, limit = 20, search } = req.query;
+
+    // Build query - only incidents assigned to this responder
+    const query = { assignedTo: req.user.id };
+
+    // Apply filters
+    if (status) {
+      query.status = status;
+    }
+
+    if (severity) {
+      query.severity = severity;
+    }
+
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    // Calculate pagination
+    const skip = (page - 1) * limit;
+
+    // Fetch incidents
+    const incidents = await Incident.find(query)
+      .populate('reportedBy', 'name email role')
+      .populate('assignedTo', 'name email role')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    // Get total count
+    const total = await Incident.countDocuments(query);
+
+    res.status(200).json({
+      success: true,
+      incidents,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Get my assigned incidents error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch assigned incidents',
+      error: error.message
+    });
+  }
+};
+
+/* ============================
    GET UNASSIGNED INCIDENTS (NEW)
    ✅ NEW: For admin assignment workflow
 ============================ */
@@ -352,7 +413,8 @@ const addComment = async (req, res) => {
 module.exports = {
   createIncident,
   getAllIncidents,
-  getUnassignedIncidents,    // ✅ NEW EXPORT
+  getMyAssignedIncidents,    // ✅ NEW EXPORT FOR STEP 1
+  getUnassignedIncidents,
   getIncidentById,
   assignIncident,
   updateIncidentStatus,
