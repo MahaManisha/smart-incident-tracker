@@ -7,6 +7,7 @@ import DashboardPage from './pages/DashboardPage';
 import IncidentsPage from './pages/IncidentsPage';
 import IncidentDetailPage from './pages/IncidentDetailPage';
 import CreateIncidentPage from './pages/CreateIncidentPage';
+import IncidentKnowledgeBasePage from './pages/IncidentKnowledgeBasePage';
 import UsersPage from './pages/UsersPage';
 import ProfilePage from './pages/Profile';
 import NotFoundPage from './pages/NotFoundPage';
@@ -62,6 +63,16 @@ function App() {
         element={
           <PrivateRoute>
             <IncidentDetailPage />
+          </PrivateRoute>
+        }
+      />
+
+      {/* Knowledge Base Route - ADMIN and RESPONDER only */}
+      <Route
+        path="/knowledge-base"
+        element={
+          <PrivateRoute>
+            <IncidentKnowledgeBasePage />
           </PrivateRoute>
         }
       />

@@ -13,6 +13,9 @@ const DashboardPage = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const user = JSON.parse(localStorage.getItem('user'));
+  const role = user?.role;
+
   useEffect(() => {
     fetchDashboardData();
   }, []);
@@ -27,6 +30,10 @@ const DashboardPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleKnowledgeBaseClick = () => {
+    navigate('/knowledge-base');
   };
 
   if (loading) {
@@ -48,6 +55,22 @@ const DashboardPage = () => {
         </div>
 
         {stats && <DashboardStats stats={stats} />}
+
+        {/* Quick Actions - Only for ADMIN and RESPONDER */}
+        {(role === 'ADMIN' || role === 'RESPONDER') && (
+          <div className="dashboard-actions">
+            <div
+              className="dashboard-action-card"
+              onClick={handleKnowledgeBaseClick}
+            >
+              <div className="action-card-icon">🧠</div>
+              <h3>Knowledge Base</h3>
+              <p>
+                Post-incident analysis, root cause documentation, and resolution strategies
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className="dashboard-grid">
           <div className="dashboard-section">
