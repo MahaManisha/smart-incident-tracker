@@ -1,0 +1,136 @@
+.services-page {
+    padding: var(--spacing-lg) 0;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.service-node-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.service-node-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+.service-node-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+}
+
+.service-node-card.status-operational::before {
+    background: var(--success-color);
+}
+
+.service-node-card.status-degraded::before {
+    background: var(--warning-color);
+}
+
+.service-node-card.status-down::before {
+    background: var(--danger-color);
+}
+
+.service-node-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.service-node-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-color);
+    font-size: 18px;
+}
+
+.service-node-info {
+    flex-grow: 1;
+}
+
+.service-node-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+}
+
+.service-node-team {
+    font-size: 12px;
+    color: var(--text-tertiary);
+}
+
+.service-node-status {
+    font-size: 20px;
+}
+
+.service-node-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+}
+
+.criticality-badge {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    background: var(--bg-tertiary);
+}
+
+.criticality-badge.critical {
+    color: var(--danger-color);
+    border: 1px solid var(--danger-color);
+}
+
+.criticality-badge.high {
+    color: #f59e0b;
+    border: 1px solid #f59e0b;
+}
+
+.criticality-badge.medium {
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+}
+
+.criticality-badge.low {
+    color: var(--success-color);
+    border: 1px solid var(--success-color);
+}
+
+.status-text {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.service-node-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-md);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--border-color);
+}

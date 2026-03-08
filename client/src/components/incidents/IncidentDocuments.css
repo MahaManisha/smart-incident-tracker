@@ -1,0 +1,203 @@
+.incident-documents-view,
+.incident-documents-form,
+.incident-documents-empty {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-top: 1.5rem;
+}
+
+.doc-header,
+.form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.5rem;
+}
+
+.doc-header h3,
+.form-header h3 {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #2c3e50;
+    font-size: 1.25rem;
+}
+
+.doc-meta {
+    font-size: 0.85rem;
+    color: #7f8c8d;
+    margin-bottom: 1.5rem;
+    display: flex;
+    gap: 1rem;
+}
+
+.doc-section {
+    margin-bottom: 1.5rem;
+}
+
+.doc-section h4 {
+    margin: 0 0 0.5rem 0;
+    color: #34495e;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.doc-section p {
+    margin: 0;
+    line-height: 1.6;
+    color: #2c3e50;
+    white-space: pre-line;
+}
+
+.attachment-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.attachment-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: #f8f9fa;
+    transition: transform 0.2s;
+}
+
+.attachment-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.file-icon {
+    font-size: 1.5rem;
+    color: #95a5a6;
+}
+
+.file-icon.pdf {
+    color: #e74c3c;
+}
+
+.file-icon.word {
+    color: #3498db;
+}
+
+.file-icon.image {
+    color: #2ecc71;
+}
+
+.file-icon.video {
+    color: #9b59b6;
+}
+
+.attachment-info {
+    flex: 1;
+    overflow: hidden;
+}
+
+.attachment-name {
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.9rem;
+}
+
+.attachment-size {
+    font-size: 0.75rem;
+    color: #95a5a6;
+}
+
+.download-btn {
+    color: #7f8c8d;
+    padding: 0.25rem;
+    border-radius: 4px;
+}
+
+.download-btn:hover {
+    color: #2c3e50;
+    background: #ecf0f1;
+}
+
+.empty-content {
+    text-align: center;
+    padding: 2rem;
+    color: #7f8c8d;
+}
+
+.empty-icon {
+    font-size: 3rem;
+    color: #ecf0f1;
+    margin-bottom: 1rem;
+}
+
+/* Form Styles */
+.file-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #eef2f7;
+    padding: 0.4rem 0.8rem;
+    border-radius: 16px;
+    font-size: 0.85rem;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.file-chip.new {
+    background: #e8f8f5;
+    color: #1abc9c;
+}
+
+.file-chip button {
+    background: none;
+    border: none;
+    color: #e74c3c;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 0;
+    margin-left: 0.25rem;
+}
+
+.upload-box {
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.upload-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #ecf0f1;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.upload-label:hover {
+    background: #dfe6e9;
+}
+
+.hidden-input {
+    display: none;
+}
+
+.upload-hint {
+    font-size: 0.85rem;
+    color: #7f8c8d;
+}

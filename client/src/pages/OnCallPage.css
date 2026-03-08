@@ -1,0 +1,80 @@
+.on-call-page {
+    padding: var(--spacing-lg) 0;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.current-oncall-card {
+    background: var(--bg-card);
+    border: 1px solid var(--primary-color);
+    border-radius: var(--border-radius-lg);
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.1);
+}
+
+.avatar-placeholder-large {
+    width: 60px;
+    height: 60px;
+    background: var(--bg-tertiary);
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    text-shadow: 0 0 10px var(--primary-color);
+}
+
+.shift-badge {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 1px;
+}
+
+.shift-badge.primary {
+    background: rgba(0, 229, 255, 0.2);
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+}
+
+.shift-tag-primary {
+    color: var(--primary-color);
+    background: rgba(0, 229, 255, 0.1);
+    border: 1px solid rgba(0, 229, 255, 0.2);
+}
+
+.shift-tag-secondary {
+    color: #ffab00;
+    background: rgba(255, 171, 0, 0.1);
+    border: 1px solid rgba(255, 171, 0, 0.2);
+}
+
+.row-active {
+    background-color: rgba(0, 229, 255, 0.05);
+}
+
+.border-neon {
+    border: 1px solid var(--primary-color);
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.1);
+}
+
+.btn-icon.danger {
+    background: none;
+    border: none;
+    color: var(--danger-color);
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 4px;
+    transition: transform 0.2s;
+}
+
+.btn-icon.danger:hover {
+    transform: scale(1.2);
+}
+
+.col-span-2 {
+    grid-column: span 2;
+}

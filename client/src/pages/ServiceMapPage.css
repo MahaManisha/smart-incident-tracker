@@ -1,0 +1,319 @@
+.service-map-page {
+    padding: var(--spacing-lg) 0;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Dependency Manager Premium Card */
+.dependency-manager-card {
+    background: rgba(26, 26, 26, 0.6);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.dependency-manager-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    color: var(--text-primary);
+}
+
+.dependency-manager-header h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.dependency-form-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr 150px 180px;
+    gap: var(--spacing-lg);
+    align-items: flex-end;
+    margin-bottom: var(--spacing-xl);
+    padding-bottom: var(--spacing-lg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.form-label-sm {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+}
+
+.form-select-premium {
+    width: 100%;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.form-select-premium:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.1);
+    outline: none;
+}
+
+.dependency-arrow-icon {
+    padding-bottom: 12px;
+    color: var(--primary-color);
+    font-size: 1.2rem;
+    display: flex;
+    justify-content: center;
+}
+
+/* Mapped Dependencies List */
+/* Mapped Dependencies Section */
+.mapped-dependencies-section {
+    margin-top: var(--spacing-xl);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.mapping-count-badge {
+    background: var(--bg-tertiary);
+    color: var(--text-tertiary);
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 700;
+}
+
+.mapping-table-wrapper {
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.mapping-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.mapping-table th {
+    text-align: left;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-tertiary);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+}
+
+.mapping-table td {
+    padding: 14px 16px;
+    border-top: 1px solid var(--border-color);
+}
+
+.service-node-name {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.service-node-name.source {
+    color: var(--primary-color);
+}
+
+.arrow-cell {
+    color: var(--text-tertiary);
+    width: 40px;
+}
+
+.criticality-tag {
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+
+.criticality-tag.hard {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.criticality-tag.soft {
+    background: rgba(0, 229, 255, 0.1);
+    color: var(--primary-color);
+    border: 1px solid rgba(0, 229, 255, 0.2);
+}
+
+.delete-mapping-btn {
+    background: none;
+    border: none;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.delete-mapping-btn:hover {
+    color: var(--danger-color);
+    transform: scale(1.1);
+}
+
+.empty-mapping-state {
+    padding: 40px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: var(--radius-md);
+    border: 1px dashed var(--border-color);
+}
+
+.empty-icon {
+    font-size: 2rem;
+    color: var(--text-tertiary);
+    margin-bottom: 12px;
+    opacity: 0.3;
+}
+
+.empty-mapping-state p {
+    color: var(--text-secondary);
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.empty-mapping-state span {
+    color: var(--text-tertiary);
+    font-size: 0.8rem;
+}
+
+/* Map Components */
+.map-container {
+    height: 700px;
+    width: 100%;
+    position: relative;
+    border: 1px solid var(--border-color);
+    background: #0d0d0d !important;
+}
+
+.custom-node-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.node-status-badge {
+    font-size: 10px;
+    font-weight: 800;
+    margin-top: 6px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.node-criticality {
+    font-size: 8px;
+    color: var(--text-tertiary);
+    margin-top: 4px;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.react-flow__handle {
+    width: 10px;
+    height: 10px;
+    background: var(--primary-color);
+}
+
+.react-flow__node {
+    cursor: grab;
+}
+
+.react-flow__node:active {
+    cursor: grabbing;
+}
+
+.react-flow__edge-path {
+    stroke-width: 3;
+}
+
+.react-flow__controls {
+    background: var(--bg-secondary) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+}
+
+.react-flow__controls button {
+    background: transparent !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    fill: var(--text-secondary) !important;
+    border-right: none !important;
+}
+
+.react-flow__controls button:hover {
+    background: var(--bg-tertiary) !important;
+    fill: var(--primary-color) !important;
+}
+
+.react-flow__minimap {
+    background: rgba(0, 0, 0, 0.8) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--radius-md) !important;
+    bottom: 20px !important;
+    right: 20px !important;
+}
+
+.map-legend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xl);
+    padding: var(--spacing-lg);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    margin-top: var(--spacing-lg);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.dot.operational {
+    background: #10b981;
+    box-shadow: 0 0 10px #10b981;
+}
+
+.dot.degraded {
+    background: #f59e0b;
+    box-shadow: 0 0 10px #f59e0b;
+}
+
+.dot.outage {
+    background: #ef4444;
+    box-shadow: 0 0 10px #ef4444;
+}

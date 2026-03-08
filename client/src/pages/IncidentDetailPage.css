@@ -1,0 +1,350 @@
+.incident-detail-page {
+  padding: var(--spacing-lg) 0;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* --- 2. Compact Header Check --- */
+.incident-header-compact {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--bg-card);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--border-radius-lg);
+  border: 1px solid var(--border-color);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.header-badges {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.priority-select-header {
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  padding: 2px 4px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  outline: none;
+}
+
+.priority-select-header:focus {
+  border-color: var(--primary-color);
+}
+
+.incident-id {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-right: var(--spacing-sm);
+}
+
+.incident-title-summary {
+  font-size: var(--font-size-md);
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-right: var(--spacing-md);
+  max-width: 400px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.service-tag {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.back-button {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: var(--border-radius-md);
+  transition: all 0.2s;
+}
+
+.back-button:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+/* --- 1. Layout & Hierarchy --- */
+.incident-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 70%) minmax(0, 30%);
+  /* 70/30 Split */
+  gap: var(--spacing-lg);
+  align-items: start;
+  /* Important for sticky sidebar */
+}
+
+.incident-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.incident-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  position: sticky;
+  top: 1rem;
+  /* Sticky Sidebar */
+}
+
+/* --- Card Utilities --- */
+.card-compact {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.card-header-dense {
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--bg-tertiary);
+  /* Slight contrast for headers */
+}
+
+.card-title-dense {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-body-dense {
+  padding: var(--spacing-md);
+}
+
+/* --- 3. Description & Details Grid --- */
+.description-text {
+  font-size: var(--font-size-md);
+  line-height: 1.6;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+  margin-bottom: var(--spacing-xl);
+  /* Increased separation */
+}
+
+/* Metadata Definition Grid */
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  /* 5 Columns */
+  gap: var(--spacing-lg) var(--spacing-md);
+  /* Vertical gap large, Horizontal normal */
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--border-color);
+  /* Subtle divider */
+}
+
+.detail-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  /* Tighter gap between label and value */
+  align-items: flex-start;
+  /* Strict Left Align */
+}
+
+.detail-label {
+  font-size: 12px;
+  /* Small */
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  /* Muted */
+  letter-spacing: 0.5px;
+  line-height: 1.4;
+}
+
+.detail-value {
+  font-size: 14px;
+  font-weight: 500;
+  /* Medium weight */
+  color: var(--text-primary);
+  /* High contrast */
+  line-height: 1.5;
+  white-space: nowrap;
+  /* Prevent wrapping if possible */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* --- 4. Actions Panel --- */
+.actions-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+/* --- 5. SLA Visibility --- */
+.sla-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.sla-visual-indicator {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sla-bar-container {
+  height: 8px;
+  background-color: var(--bg-tertiary);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.sla-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.sla-bar-fill.success {
+  background-color: var(--success-color);
+}
+
+.sla-bar-fill.warning {
+  background-color: var(--warning-color);
+}
+
+.sla-bar-fill.danger {
+  background-color: var(--danger-color);
+}
+
+.sla-status-text {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+}
+
+.sla-timer {
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  padding: var(--spacing-sm);
+  background: var(--bg-background);
+  border-radius: var(--border-radius-md);
+  color: var(--text-primary);
+}
+
+/* Escalation Card */
+.escalation-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.esc-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--font-size-sm);
+  margin-bottom: 4px;
+}
+
+.esc-label {
+  color: var(--text-secondary);
+}
+
+.esc-value {
+  font-weight: 600;
+}
+
+.esc-value.status-active {
+  color: var(--primary-color);
+}
+
+.esc-value.status-escalated {
+  color: #ffab00;
+}
+
+.esc-value.status-completed {
+  color: var(--success-color);
+}
+
+.text-warning {
+  color: #ffab00;
+}
+
+/* --- 6. Activity Timeline Section --- */
+.timeline-section-header {
+  margin-top: var(--spacing-xl);
+  margin-bottom: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .incident-detail-grid {
+    grid-template-columns: 1fr;
+    /* Stack on tablet/mobile */
+  }
+
+  .details-grid {
+    grid-template-columns: repeat(2, 1fr);
+    /* 2 Columns on Tablet */
+  }
+
+  .incident-sidebar {
+    position: static;
+    /* Unstick on mobile */
+    order: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .details-grid {
+    grid-template-columns: 1fr;
+    /* 1 Column on Mobile */
+  }
+}

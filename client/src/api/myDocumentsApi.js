@@ -1,0 +1,31 @@
+import axiosInstance from './axiosConfig';
+
+export const getMyDocuments = async (params = {}) => {
+    const query = new URLSearchParams();
+    if (params.search) query.append('search', params.search);
+    if (params.incident_id) query.append('incident_id', params.incident_id);
+    if (params.file_type) query.append('file_type', params.file_type);
+    if (params.date) query.append('date', params.date);
+
+    const response = await axiosInstance.get(`/reporter/documents?${query.toString()}`);
+    return response;
+};
+
+export const uploadDocument = async (formData) => {
+    const response = await axiosInstance.post('/reporter/documents', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response;
+};
+
+export const updateDocument = async (id, formData) => {
+    const response = await axiosInstance.put(`/reporter/documents/${id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response;
+};
+
+export const deleteDocument = async (id) => {
+    const response = await axiosInstance.delete(`/reporter/documents/${id}`);
+    return response;
+};

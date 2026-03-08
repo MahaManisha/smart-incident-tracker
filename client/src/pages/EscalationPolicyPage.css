@@ -1,0 +1,60 @@
+.escalation-page {
+    padding: var(--spacing-lg) 0;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.policies-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.timeline-preview {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    margin-top: var(--spacing-md);
+}
+
+.timeline-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    background-color: var(--bg-tertiary);
+    padding: 0.5rem;
+    border-radius: var(--radius-sm);
+    border-left: 2px solid var(--primary-color);
+}
+
+.level-num {
+    font-weight: bold;
+    font-size: var(--font-size-xs);
+    color: var(--primary-color);
+    background-color: rgba(0, 229, 255, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.level-details {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.default-badge {
+    font-size: 10px;
+    background-color: var(--success-color);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+.bg-tertiary {
+    background-color: var(--bg-tertiary);
+}
+
+.border-t {
+    border-top: 1px solid var(--border-color);
+}

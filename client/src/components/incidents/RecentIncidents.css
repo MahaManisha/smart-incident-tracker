@@ -1,0 +1,79 @@
+.recent-incidents {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.section-title {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.incident-number {
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  color: var(--info-color);
+  background: var(--info-bg);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.incident-title {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.incident-time {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+/* Table container adjustments for card fit */
+.table-container {
+  border: none;
+  /* Remove double border if card has one */
+  border-radius: 0;
+  background: transparent;
+}
+
+.table th {
+  background-color: transparent;
+  border-bottom: 2px solid var(--border-color);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--text-tertiary);
+}
+
+/* Hover effect for table rows */
+.table tbody tr {
+  transition: background-color var(--transition-fast);
+}
+
+.table tbody tr:hover {
+  background-color: var(--slate-50);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .table-container {
+    overflow-x: auto;
+  }
+
+  .table {
+    min-width: 600px;
+  }
+}

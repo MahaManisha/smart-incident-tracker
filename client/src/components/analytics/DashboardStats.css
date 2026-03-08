@@ -1,0 +1,184 @@
+/* DashboardStats.css - Modern Visual Polish */
+
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  /* Strict 4 columns on desktop */
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+/* Stat Card Base */
+.stat-card {
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid var(--border-color);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--border-focus);
+  /* Use variable focus color */
+}
+
+/* Stat Header */
+.stat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+/* Icon Container */
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  transition: transform 0.3s ease;
+  background: var(--bg-secondary);
+  /* Default background */
+  color: var(--text-secondary);
+}
+
+.stat-card:hover .stat-icon {
+  transform: scale(1.1) rotate(5deg);
+}
+
+/* Stat Content */
+.stat-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.stat-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.stat-description {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  margin-top: 4px;
+}
+
+/* Trend Indicator */
+.stat-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.stat-trend.up {
+  background: var(--success-bg);
+  color: var(--success-color);
+}
+
+.stat-trend.down {
+  background: var(--danger-bg);
+  color: var(--danger-color);
+}
+
+/* ===== Semantic Variants (Using Variables for Theme Compatibility) ===== */
+
+/* Open Incidents */
+.stat-card-open {
+  border-color: var(--danger-color);
+}
+
+.stat-card-open .stat-icon {
+  background: var(--danger-bg);
+  color: var(--danger-color);
+}
+
+.stat-card-open .stat-value {
+  color: var(--danger-color);
+}
+
+/* In Progress */
+.stat-card-progress {
+  border-color: var(--warning-color);
+}
+
+.stat-card-progress .stat-icon {
+  background: var(--warning-bg);
+  color: var(--warning-color);
+}
+
+/* Resolved */
+.stat-card-resolved {
+  border-color: var(--success-color);
+}
+
+.stat-card-resolved .stat-icon {
+  background: var(--success-bg);
+  color: var(--success-color);
+}
+
+/* SLA Breaches */
+.stat-card-critical {
+  border-left: 4px solid var(--danger-color);
+}
+
+.stat-card-critical .stat-icon {
+  background: var(--danger-bg);
+  color: var(--danger-color);
+}
+
+.stat-card-critical .stat-value {
+  color: var(--danger-color);
+}
+
+/* Responsive Design */
+@media (max-width: 1280px) {
+  .dashboard-stats {
+    grid-template-columns: repeat(2, 1fr);
+    /* 2 columns on tablet/small laptop */
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-stats {
+    grid-template-columns: 1fr;
+    /* 1 column on mobile */
+    gap: var(--spacing-md);
+  }
+
+  .stat-card {
+    padding: 20px;
+  }
+}
+
+/* Loading State */
+.stat-card.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}

@@ -1,0 +1,36 @@
+.priority-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: 1px solid;
+}
+
+.priority-badge.priority-p0 {
+    background-color: rgba(255, 59, 59, 0.15);
+    color: var(--priority-p0);
+    border-color: var(--priority-p0);
+}
+
+.priority-badge.priority-p1 {
+    background-color: rgba(255, 140, 0, 0.15);
+    color: var(--priority-p1);
+    border-color: var(--priority-p1);
+}
+
+.priority-badge.priority-p2 {
+    background-color: rgba(255, 215, 0, 0.15);
+    color: var(--priority-p2);
+    border-color: var(--priority-p2);
+}
+
+.priority-badge.priority-p3 {
+    background-color: rgba(0, 200, 83, 0.15);
+    color: var(--priority-p3);
+    border-color: var(--priority-p3);
+}
