@@ -1,3 +1,5 @@
+/* IncidentTimeline.css - Premium Glassmorphism */
+
 .incident-timeline {
     padding: 10px 0;
 }
@@ -11,78 +13,94 @@
 
 .timeline-item {
     display: flex;
-    gap: 16px;
+    gap: 20px;
     position: relative;
+    group;
 }
 
 .timeline-marker {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 32px;
+    width: 40px;
+    position: relative;
 }
 
 .marker-icon {
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    background: var(--bg-tertiary);
+    background: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
+    font-size: 1.1rem;
     z-index: 2;
-    border: 1px solid var(--border-color);
-    color: var(--text-secondary);
+    border: 2px solid rgba(226, 232, 240, 0.8);
+    color: var(--slate-500);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.timeline-item:hover .marker-icon {
+    transform: scale(1.15) rotate(5deg);
 }
 
 .marker-icon.created {
-    color: var(--success-color);
-    border-color: var(--success-color);
+    color: var(--emerald-500);
+    border-color: rgba(16, 185, 129, 0.2);
+    background: linear-gradient(135deg, #ecfdf5, #d1fae5);
 }
 
 .marker-icon.assigned {
-    color: var(--primary-color);
-    border-color: var(--primary-color);
+    color: var(--blue-600);
+    border-color: rgba(59, 130, 246, 0.2);
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
 }
 
 .marker-icon.status_changed {
     color: var(--warning-color);
-    border-color: var(--warning-color);
+    border-color: rgba(245, 158, 11, 0.2);
+    background: linear-gradient(135deg, #fffbeb, #fef3c7);
 }
 
 .marker-icon.priority_changed {
-    color: #f59e0b;
-    border-color: #f59e0b;
+    color: #f97316;
+    border-color: rgba(249, 115, 22, 0.2);
+    background: linear-gradient(135deg, #fff7ed, #ffedd5);
 }
 
 .marker-icon.escalated {
-    color: #f43f5e;
-    border-color: #f43f5e;
+    color: #e11d48;
+    border-color: rgba(225, 29, 72, 0.2);
+    background: linear-gradient(135deg, #fff1f2, #ffe4e6);
 }
 
 .marker-icon.resolved {
-    color: #10b981;
-    border-color: #10b981;
-    background: rgba(16, 185, 129, 0.1);
+    color: white;
+    border-color: var(--emerald-500);
+    background: linear-gradient(135deg, var(--emerald-400), var(--emerald-600));
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .marker-icon.comment {
-    color: #3b82f6;
-    border-color: #3b82f6;
+    color: var(--indigo-600);
+    border-color: rgba(79, 70, 229, 0.2);
+    background: linear-gradient(135deg, #eef2ff, #e0e7ff);
 }
 
 .marker-line {
     flex-grow: 1;
     width: 2px;
-    background: var(--border-color);
+    background: linear-gradient(to bottom, rgba(226, 232, 240, 0.8), rgba(226, 232, 240, 0.2));
     margin-top: 4px;
     margin-bottom: 4px;
 }
 
 .timeline-content {
     flex-grow: 1;
-    padding-bottom: 24px;
+    padding-bottom: 32px;
+    padding-top: 4px;
 }
 
 .timeline-item.last .timeline-content {
@@ -93,45 +111,69 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
+    background: rgba(248, 250, 252, 0.5);
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(226, 232, 240, 0.5);
+    transition: all 0.2s;
+}
+
+.timeline-item:hover .timeline-header {
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    transform: translateX(4px);
+    border-color: rgba(147, 197, 253, 0.3);
 }
 
 .event-message {
-    font-weight: 600;
-    color: var(--text-primary);
-    font-size: 14px;
+    font-weight: 700;
+    color: var(--slate-800);
+    font-size: 0.95rem;
+    line-height: 1.4;
 }
 
 .event-time {
-    font-size: 11px;
-    color: var(--text-tertiary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--slate-400);
     white-space: nowrap;
 }
 
 .timeline-footer {
     display: flex;
     align-items: center;
+    padding: 0 16px;
 }
 
 .event-user {
-    font-size: 12px;
-    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--slate-500);
     display: flex;
     align-items: center;
 }
 
 .user-role-badge {
-    margin-left: 4px;
-    font-size: 10px;
-    opacity: 0.7;
+    margin-left: 8px;
+    font-size: 0.65rem;
+    font-weight: 800;
+    background: var(--slate-100);
+    padding: 2px 6px;
+    border-radius: 6px;
+    color: var(--slate-600);
     text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 .no-events,
 .timeline-error {
     text-align: center;
-    padding: 20px;
-    color: var(--text-secondary);
+    padding: 32px;
+    color: var(--slate-400);
     font-style: italic;
-    font-size: 14px;
+    font-size: 0.95rem;
+    background: rgba(248, 250, 252, 0.5);
+    border-radius: 12px;
+    border: 1px dashed rgba(226, 232, 240, 0.8);
 }

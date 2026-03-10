@@ -1,83 +1,119 @@
+/* CommentSection.css - Premium Glassmorphism */
+
 .comment-section {
   margin-top: var(--spacing-xl);
+  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .comment-form {
-  padding-bottom: var(--spacing-lg);
-  margin-bottom: var(--spacing-lg);
-  border-bottom: 1px solid var(--border-color);
+  padding: 24px;
+  margin-bottom: var(--spacing-2xl);
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1px dashed rgba(226, 232, 240, 0.8);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.comment-form:focus-within {
+  background: rgba(255, 255, 255, 0.9);
+  border-style: solid;
+  border-color: var(--blue-300);
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.05);
+  transform: translateY(-2px);
+}
+
+.comment-form textarea {
+  border: none;
+  background: transparent;
+  box-shadow: none !important;
+  font-size: 0.95rem;
+  padding: 0;
 }
 
 .comment-form-footer {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
-  margin-top: var(--spacing-sm);
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(226, 232, 240, 0.5);
 }
 
 .comments-list {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
+  gap: 20px;
 }
 
 .comment-item {
-  padding: var(--spacing-md);
-  background: var(--gray-50);
-  border-radius: var(--radius-md);
-  border-left: 3px solid var(--primary-color);
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+  border-radius: 16px;
+  border-left: 4px solid var(--blue-500);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.comment-item:hover {
+  transform: translateX(4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05);
+  background: white;
 }
 
 .comment-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--spacing-sm);
+  align-items: flex-start;
+  margin-bottom: 12px;
 }
 
 .comment-author {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: 12px;
 }
 
 .author-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--blue-500), var(--indigo-600));
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-sm);
+  font-weight: 800;
+  font-size: 0.95rem;
+  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2);
 }
 
 .author-info {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
 }
 
 .author-name {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--slate-900);
+  line-height: 1.2;
 }
 
 .comment-time {
-  font-size: var(--font-size-xs);
-  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--slate-400);
+  margin-top: 2px;
 }
 
 .comment-content {
-  padding-left: 40px;
+  padding-left: 52px;
 }
 
 .comment-content p {
-  font-size: var(--font-size-sm);
-  color: var(--text-primary);
+  font-size: 0.95rem;
+  color: var(--slate-700);
   line-height: 1.6;
   margin: 0;
   white-space: pre-wrap;
@@ -85,21 +121,19 @@
 
 .empty-state-small {
   text-align: center;
-  padding: var(--spacing-xl);
-  color: var(--text-secondary);
-  font-size: var(--font-size-sm);
+  padding: 40px;
+  background: rgba(248, 250, 252, 0.5);
+  border-radius: 16px;
+  border: 1px dashed rgba(226, 232, 240, 0.8);
+  color: var(--slate-400);
+  font-size: 0.95rem;
+  font-style: italic;
 }
 
 /* Responsive */
 @media (max-width: 640px) {
-  .comment-form-footer {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--spacing-sm);
-  }
-
   .comment-content {
     padding-left: 0;
-    margin-top: var(--spacing-sm);
+    margin-top: 16px;
   }
 }
