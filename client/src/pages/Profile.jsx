@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import axiosInstance from '../api/axiosConfig';
 import ChangePasswordModal from '../components/users/ChangePasswordModal';
 import EditProfileModal from '../components/users/EditProfileModal';
-import { FaLock, FaPen, FaUser } from 'react-icons/fa';
+import { FaLock, FaPen, FaUser, FaArrowLeft } from 'react-icons/fa';
 import './Profile.css';
 
 const Profile = () => {
   const { user: authUser, updateUser: updateAuthUser } = useAuth();
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -82,6 +84,9 @@ const Profile = () => {
             <p className="page-subheading">Manage your personal information and security settings</p>
           </div>
           <div className="header-actions">
+            <button className="btn btn-secondary" onClick={() => navigate('/dashboard')}>
+              <FaArrowLeft className="btn-icon" /> Back to Dashboard
+            </button>
             <button className="btn btn-secondary" onClick={handleChangePasswordClick}>
               <FaLock className="btn-icon" /> Change Password
             </button>
