@@ -27,6 +27,11 @@ const getTeamMessages = async (req, res) => {
 
         const messages = await Message.find({ team: teamId })
             .populate('sender', 'name profileImage')
+            .populate({
+                path: 'replyTo',
+                select: 'content sender image',
+                populate: { path: 'sender', select: 'name' }
+            })
             .sort({ createdAt: 1 }); // Oldest first
 
         res.json(messages);
@@ -41,16 +46,27 @@ const getTeamMessages = async (req, res) => {
 const sendMessage = async (req, res) => {
     try {
         const { id: teamId } = req.params;
-        const { content } = req.body;
+        const { content, replyTo, image } = req.body;
         const senderId = req.user.id;
 
-        const message = await Message.create({
+        const messageData = {
             team: teamId,
             sender: senderId,
             content
-        });
+        };
 
-        const populatedMessage = await message.populate('sender', 'name profileImage');
+        if (replyTo) messageData.replyTo = replyTo;
+        if (image) messageData.image = image;
+
+        const message = await Message.create(messageData);
+
+        const populatedMessage = await Message.findById(message._id)
+            .populate('sender', 'name profileImage')
+            .populate({
+                path: 'replyTo',
+                select: 'content sender image',
+                populate: { path: 'sender', select: 'name' }
+            });
 
         res.status(201).json(populatedMessage);
     } catch (error) {

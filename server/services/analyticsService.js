@@ -19,6 +19,9 @@ const getUnifiedDashboardStats = async () => {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
+    const sixtyDaysAgo = new Date();
+    sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+
     // Parallel Aggregations
     const [
       statusCounts,
@@ -26,6 +29,9 @@ const getUnifiedDashboardStats = async () => {
       trendData,
       slaBreachCount,
       avgResTime,
+      prevAvgResTime,
+      mttaTime,
+      prevMttaTime,
       teamPerf
     ] = await Promise.all([
       // 1. Status Counts
@@ -71,7 +77,7 @@ const getUnifiedDashboardStats = async () => {
       // 4. SLA Breaches (Count)
       Incident.countDocuments({ slaStatus: 'BREACHED' }),
 
-      // 5. Avg Resolution Time (Resolved in last 30 days)
+      // 5. Avg Resolution Time (Resolved in last 30 days - MTTR)
       Incident.aggregate([
         {
           $match: {
@@ -90,6 +96,75 @@ const getUnifiedDashboardStats = async () => {
           $group: {
             _id: null,
             avgMinutes: { $avg: "$durationMinutes" }
+          }
+        }
+      ]),
+      
+      // 5b. Prev Avg Resolution Time (Resolved 30-60 days ago - Prev MTTR)
+      Incident.aggregate([
+        {
+          $match: {
+            status: { $in: ['RESOLVED', 'CLOSED', 'Resolved', 'Closed'] },
+            resolvedAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo }
+          }
+        },
+        {
+          $project: {
+            durationMinutes: {
+              $divide: [{ $subtract: ["$resolvedAt", "$createdAt"] }, 60000]
+            }
+          }
+        },
+        {
+          $group: {
+            _id: null,
+            avgMinutes: { $avg: "$durationMinutes" }
+          }
+        }
+      ]),
+
+      // 5c. MTTA (Mean Time To Acknowledge in last 30 days)
+      Incident.aggregate([
+        {
+          $match: {
+            assignedAt: { $gte: thirtyDaysAgo },
+            createdAt: { $ne: null }
+          }
+        },
+        {
+          $project: {
+            ackDurationMinutes: {
+              $divide: [{ $subtract: ["$assignedAt", "$createdAt"] }, 60000]
+            }
+          }
+        },
+        {
+          $group: {
+            _id: null,
+            avgMinutes: { $avg: "$ackDurationMinutes" }
+          }
+        }
+      ]),
+
+      // 5d. Prev MTTA (Mean Time To Acknowledge 30-60 days ago)
+      Incident.aggregate([
+        {
+          $match: {
+            assignedAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo },
+            createdAt: { $ne: null }
+          }
+        },
+        {
+          $project: {
+            ackDurationMinutes: {
+              $divide: [{ $subtract: ["$assignedAt", "$createdAt"] }, 60000]
+            }
+          }
+        },
+        {
+          $group: {
+            _id: null,
+            avgMinutes: { $avg: "$ackDurationMinutes" }
           }
         }
       ]),
@@ -164,12 +239,23 @@ const getUnifiedDashboardStats = async () => {
     ]);
 
     // Process Results
+    const currentMttrHrs = (avgResTime && avgResTime.length > 0) ? (avgResTime[0].avgMinutes / 60) : 0;
+    const prevMttrHrs = (prevAvgResTime && prevAvgResTime.length > 0) ? (prevAvgResTime[0].avgMinutes / 60) : 0;
+    const mttrTrend = prevMttrHrs > 0 ? ((currentMttrHrs - prevMttrHrs) / prevMttrHrs) * 100 : 0;
+
+    const currentMttaHrs = (mttaTime && mttaTime.length > 0) ? (mttaTime[0].avgMinutes / 60) : 0;
+    const prevMttaHrs = (prevMttaTime && prevMttaTime.length > 0) ? (prevMttaTime[0].avgMinutes / 60) : 0;
+    const mttaTrend = prevMttaHrs > 0 ? ((currentMttaHrs - prevMttaHrs) / prevMttaHrs) * 100 : 0;
+
     const stats = {
       open: 0,
       inProgress: 0,
       resolvedToday: 0,
       slaBreaches: slaBreachCount || 0,
-      avgResolutionTimeHours: (avgResTime && avgResTime.length > 0) ? Math.round(avgResTime[0].avgMinutes / 60) : 0
+      avgResolutionTimeHours: Math.round(currentMttrHrs * 10) / 10,
+      mttrTrend: Math.round(mttrTrend),
+      mttaHours: Math.round(currentMttaHrs * 10) / 10,
+      mttaTrend: Math.round(mttaTrend)
     };
 
     // Fill Summary (Case Insensitive)

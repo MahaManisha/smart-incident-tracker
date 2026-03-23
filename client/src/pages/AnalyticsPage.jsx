@@ -66,9 +66,26 @@ const AnalyticsPage = () => {
     const handleExport = async () => {
         try {
             setExporting(true);
-            await exportReport();
+            const response = await exportReport();
+            
+            // Create a Blob from the CSV data
+            const blob = new Blob([response.data || response], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            
+            // Create a temporary link and click it to trigger download
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `incident-analytics-report-${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            
+            // Cleanup
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+
             toast.success('Report exported successfully');
         } catch (error) {
+            console.error('Export error:', error);
             toast.error('Failed to export report');
         } finally {
             setExporting(false);
@@ -86,6 +103,20 @@ const AnalyticsPage = () => {
     }
 
     // --- Prepare Chart Data ---
+
+    const renderTrend = (trendValue, isInverted = false) => {
+        if (trendValue === undefined || trendValue === null || trendValue === 0) return null;
+        // For Time metrics: lower is better (inverted)
+        const isPositive = trendValue > 0;
+        const displayTrend = Math.abs(trendValue);
+        const isGood = isInverted ? !isPositive : isPositive;
+        
+        return (
+            <span className={`insight-trend ${isGood ? 'trend-good' : 'trend-bad'}`}>
+                {isPositive ? '↑' : '↓'} {displayTrend}% vs Last Mth
+            </span>
+        );
+    };
 
     // 1. Incident Trends (Line Chart)
     const last30Days = Array.from({ length: 30 }, (_, i) => {
@@ -215,33 +246,35 @@ const AnalyticsPage = () => {
                         <h1><FaChartLine style={{ marginRight: '10px' }} /> Advanced Analytics</h1>
                         <p>Deep dive into operational metrics and team performance</p>
                     </div>
-                    <div className="header-actions">
+                    <div className="header-actions" style={{ display: 'flex', gap: '12px' }}>
                         <button
                             className="btn btn-primary export-btn"
                             onClick={handleExport}
                             disabled={exporting}
                         >
-                            <FaDownload /> {exporting ? 'Exporting...' : 'Export Report'}
+                            <FaDownload /> {exporting ? 'Exporting...' : 'Export CSV'}
+                        </button>
+                        <button
+                            className="btn btn-primary export-btn pdf-btn"
+                            style={{ backgroundColor: 'var(--slate-800)', color: 'white', border: 'none' }}
+                            onClick={() => window.print()}
+                        >
+                            <FaDownload /> Export PDF
                         </button>
                     </div>
                 </header>
 
                 <div className="analytics-insights-grid">
                     <div className="insight-card">
-                        <div className="insight-icon total">
-                            <FaChartLine />
+                        <div className="insight-icon open">
+                            <FaExclamationCircle />
                         </div>
                         <div className="insight-content">
-                            <h3>Total Incidents</h3>
-                            <p className="insight-value">{
-                                // Calculate total from status counts or use a total field if provided
-                                // Calculate total from status counts or use a total field if provided
-                                (data.summary?.open || 0) +
-                                (data.summary?.inProgress || 0) +
-                                (data.status.find(s => s.category === 'RESOLVED')?.count || 0) +
-                                (data.status.find(s => s.category === 'CLOSED')?.count || 0)
-                            }</p>
-                            <span className="insight-period">All Time Active</span>
+                            <h3>Active Now</h3>
+                            <p className="insight-value">
+                                {(data.summary?.open || 0) + (data.summary?.inProgress || 0)}
+                            </p>
+                            <span className="insight-period">Open + In Progress</span>
                         </div>
                     </div>
 
@@ -257,15 +290,16 @@ const AnalyticsPage = () => {
                     </div>
 
                     <div className="insight-card">
-                        <div className="insight-icon open">
-                            <FaExclamationCircle />
+                        <div className="insight-icon total">
+                            <FaClock />
                         </div>
                         <div className="insight-content">
-                            <h3>Active Now</h3>
+                            <h3>MTTA (Acknowledge)</h3>
                             <p className="insight-value">
-                                {(data.summary?.open || 0) + (data.summary?.inProgress || 0)}
+                                {data.summary?.mttaHours || 0} h
                             </p>
-                            <span className="insight-period">Open + In Progress</span>
+                            <span className="insight-period">Last 30 Days</span>
+                            {renderTrend(data.summary?.mttaTrend, true)}
                         </div>
                     </div>
 
@@ -274,11 +308,12 @@ const AnalyticsPage = () => {
                             <FaClock />
                         </div>
                         <div className="insight-content">
-                            <h3>Avg Resolution</h3>
+                            <h3>MTTR (Resolve)</h3>
                             <p className="insight-value">
                                 {data.summary?.avgResolutionTimeHours || 0} h
                             </p>
                             <span className="insight-period">Last 30 Days</span>
+                            {renderTrend(data.summary?.mttrTrend, true)}
                         </div>
                     </div>
                 </div>

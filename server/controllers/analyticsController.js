@@ -223,14 +223,28 @@ const exportReport = async (req, res) => {
         filename = `dashboard-report-${Date.now()}.csv`;
         // Convert Metrics Object to CSV (Key, Value)
         csvData += 'Metric,Value\n';
-        for (const [key, value] of Object.entries(data)) {
-          // Handle nested objects if any, or just primitive values
-          if (typeof value === 'object' && value !== null) {
-            csvData += `${key},${JSON.stringify(value).replace(/,/g, ';')}\n`;
-          } else {
-            csvData += `${key},${value}\n`;
+        
+        // Flatten summary
+        if (data.summary) {
+          for (const [key, value] of Object.entries(data.summary)) {
+            csvData += `Summary: ${key},${value}\n`;
           }
         }
+        
+        // Flatten distribution arrays
+        if (data.distribution && data.distribution.severity) {
+          data.distribution.severity.forEach(item => {
+            csvData += `Severity: ${item.category},${item.count}\n`;
+          });
+        }
+        if (data.distribution && data.distribution.status) {
+          data.distribution.status.forEach(item => {
+            csvData += `Status: ${item.category},${item.count}\n`;
+          });
+        }
+
+        // Add today's date
+        csvData += `Exported At,${new Date().toISOString()}\n`;
         break;
 
       case 'sla':

@@ -197,19 +197,32 @@ const isSLAMet = (incident) => {
   return false;
 };
 
-// Placeholder for full SLA compliance metrics report to avoid crash in analytics logic
+// Full SLA compliance metrics report
 const getSLAComplianceMetrics = async (startDate, endDate) => {
-  // Simple stub for now - in full implementation this would run aggregations
-  const total = await Incident.countDocuments({
-    createdAt: { $gte: startDate, $lte: endDate }
+  const incidents = await Incident.find({
+    createdAt: { $gte: startDate, $lte: endDate },
+    status: { $nin: ['OPEN', 'ASSIGNED', 'INVESTIGATING'] } // usually only check closed/resolved for SLA accuracy
   });
 
-  // This is a minimal implementation to satisfy the export function call
+  const total = incidents.length;
+  let met = 0;
+  let breached = 0;
+
+  incidents.forEach(inc => {
+    if (isSLAMet(inc)) {
+      met++;
+    } else {
+      breached++;
+    }
+  });
+
+  const complianceRate = total > 0 ? (met / total) * 100 : 0;
+
   return {
     total,
-    met: 0,
-    breached: 0,
-    complianceRate: 0
+    met,
+    breached,
+    complianceRate: Math.round(complianceRate * 10) / 10
   };
 };
 

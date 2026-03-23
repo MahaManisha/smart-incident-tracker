@@ -11,10 +11,14 @@ export const getTeamMessages = async (teamId) => {
 };
 
 // Send a message (HTTP fallback / persistence)
-export const sendMessage = async (teamId, content) => {
+export const sendMessage = async (teamId, content, replyTo = null, image = null) => {
     try {
-        const response = await axiosInstance.post(`/messages/${teamId}`, { content });
-        return response;
+        const payload = { content };
+        if (replyTo) payload.replyTo = replyTo;
+        if (image) payload.image = image;
+        
+        const response = await axiosInstance.post(`/messages/${teamId}`, payload);
+        return response.data || response;
     } catch (error) {
         throw error;
     }

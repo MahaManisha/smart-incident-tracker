@@ -14,8 +14,17 @@ const messageSchema = new mongoose.Schema(
         },
         content: {
             type: String,
-            required: true,
+            required: false, // Make it false because a message can just be an image
             trim: true,
+        },
+        replyTo: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Message",
+            default: null,
+        },
+        image: {
+            type: String, // Base64 data URL or regular URL
+            default: null,
         },
     },
     { timestamps: true }

@@ -78,3 +78,112 @@
 .col-span-2 {
     grid-column: span 2;
 }
+
+/* Escalation Tiers Grid */
+.escalation-tiers-grid {
+    display: grid;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+@media (min-width: 768px) {
+    .escalation-tiers-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.tier-card {
+    background: var(--surface-card);
+    border-radius: 12px;
+    padding: 1.25rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border-top: 4px solid transparent;
+}
+
+.border-primary { border-top-color: var(--primary-color); }
+.border-warning { border-top-color: #f59e0b; }
+.border-purple { border-top-color: #8b5cf6; }
+
+.text-primary { color: var(--primary-color); }
+.text-warning { color: #f59e0b; }
+.text-purple { color: #8b5cf6; }
+
+.bg-primary-100 { background: rgba(59, 130, 246, 0.1); }
+.bg-warning-100 { background: rgba(245, 158, 11, 0.1); }
+.bg-purple-100 { background: rgba(139, 92, 246, 0.1); }
+
+.avatar-placeholder-sm {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+
+.active-oncall-user {
+    padding: 0.5rem;
+    border-radius: 8px;
+    background: var(--surface-ground);
+    transition: transform 0.2s;
+}
+
+.active-oncall-user:hover {
+    transform: translateX(4px);
+}
+
+/* Calendar Overrides */
+.calendar-container {
+    background: var(--surface-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+}
+
+.rbc-calendar {
+    font-family: inherit;
+    min-height: 600px;
+}
+
+.rbc-toolbar button {
+    color: var(--text-primary);
+    border: 1px solid var(--border-input);
+}
+
+.rbc-toolbar button.rbc-active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.rbc-toolbar button:hover {
+    background-color: rgba(59, 130, 246, 0.1);
+}
+
+.rbc-event {
+    padding: 2px 6px;
+}
+
+/* Modal form adjustments */
+.override-form-card {
+    border: 1px solid var(--primary-color);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.1);
+    animation: slideDown 0.3s ease-out forwards;
+}
+
+.active-event-card {
+    border-top: 4px solid var(--primary-color);
+    animation: slideUp 0.3s ease-out forwards;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

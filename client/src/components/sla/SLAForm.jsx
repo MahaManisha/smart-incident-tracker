@@ -316,7 +316,7 @@ const SLAForm = ({ initialData, onSave, onCancel, loading }) => {
                                     }`}>
                                     {target.priority} Priority
                                 </span>
-                                <label className="flex items-center text-sm text-gray-600">
+                                <label className="flex items-center text-sm font-bold text-gray-700 bg-white px-3 py-1.5 border border-gray-200 rounded cursor-pointer hover:bg-gray-50">
                                     <input
                                         type="checkbox"
                                         className="mr-2 rounded text-blue-600 focus:ring-blue-500"
@@ -327,9 +327,17 @@ const SLAForm = ({ initialData, onSave, onCancel, loading }) => {
                                             setFormData({ ...formData, targets: newTargets });
                                         }}
                                     />
-                                    Business Hours Only
+                                    Pause SLA on Weekends (Business Hours Only)
                                 </label>
                             </div>
+
+                            {/* Info tooltip banner if business hours is true */}
+                            {target.businessHours && (
+                                <div className="mb-4 text-xs font-semibold text-blue-800 bg-blue-50 p-2 rounded border border-blue-100 flex items-center gap-2">
+                                    <span className="text-lg">⏸</span> 
+                                    SLAs for {target.priority} tickets will freeze at 5:00 PM Friday and resume at 9:00 AM Monday.
+                                </div>
+                            )}
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>

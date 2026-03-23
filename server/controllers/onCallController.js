@@ -64,41 +64,30 @@ exports.getAllSchedules = async (req, res) => {
 };
 
 /**
- * Get the currently active on-call user (Primary followed by Secondary)
+ * Get the currently active on-call users across all tiers (PRIMARY, SECONDARY, TERTIARY)
  */
 exports.getCurrentOnCall = async (req, res) => {
     try {
         const now = new Date();
 
-        // Find Primary
-        let current = await OnCallSchedule.findOne({
+        // Find all currently active shifts
+        const activeShifts = await OnCallSchedule.find({
             startTime: { $lte: now },
             endTime: { $gte: now },
-            isActive: true,
-            shiftType: 'PRIMARY'
+            isActive: true
         })
-            .sort({ startTime: -1 }) // Sort DESC to get the most recently started active shift
-            .populate('user', 'name email role');
+        .sort({ shiftType: 1, startTime: -1 })
+        .populate('user', 'name email role');
 
-        // If no Primary, find Secondary
-        if (!current) {
-            current = await OnCallSchedule.findOne({
-                startTime: { $lte: now },
-                endTime: { $gte: now },
-                isActive: true,
-                shiftType: 'SECONDARY'
-            })
-                .sort({ startTime: -1 }) // Sort DESC to get the most recently started active shift
-                .populate('user', 'name email role');
-        }
+        const categorizedShifts = {
+            PRIMARY: activeShifts.filter(s => s.shiftType === 'PRIMARY'),
+            SECONDARY: activeShifts.filter(s => s.shiftType === 'SECONDARY'),
+            TERTIARY: activeShifts.filter(s => s.shiftType === 'TERTIARY')
+        };
 
-        if (!current) {
-            return res.status(404).json({ message: 'No active on-call user found' });
-        }
-
-        res.json(current);
+        res.json(categorizedShifts);
     } catch (error) {
-        res.status(500).json({ message: 'Error finding current on-call user' });
+        res.status(500).json({ message: 'Error finding current on-call users' });
     }
 };
 

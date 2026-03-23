@@ -22,7 +22,7 @@ const onCallScheduleSchema = new mongoose.Schema({
     },
     shiftType: {
         type: String,
-        enum: ['PRIMARY', 'SECONDARY'],
+        enum: ['PRIMARY', 'SECONDARY', 'TERTIARY'],
         default: 'PRIMARY'
     },
     isActive: {

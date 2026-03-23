@@ -24,12 +24,21 @@ const escalationLevelSchema = new mongoose.Schema({
     }
 });
 
+const conditionSchema = new mongoose.Schema({
+    field: { type: String, required: true },
+    operator: { type: String, required: true },
+    value: { type: mongoose.Schema.Types.Mixed, required: true }
+}, { _id: false });
+
 const escalationPolicySchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
         trim: true
     },
+    description: { type: String },
+    conditions: [conditionSchema],
+    routingLogic: { type: String, enum: ['ALL', 'ANY', 'CUSTOM'], default: 'ALL' },
     levels: [escalationLevelSchema],
     isDefault: {
         type: Boolean,
