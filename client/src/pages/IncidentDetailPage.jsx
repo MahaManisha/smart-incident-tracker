@@ -118,7 +118,8 @@ const IncidentDetailPage = () => {
 
   // Decide what actions to show
   const showAdminPanel = isAdmin;
-  const showResponderActions = !isAdmin && (isResponder || isAssigned);
+  // Allow Admins to see normal actions if the incident is unassigned (OPEN) so they can directly assign it.
+  const showResponderActions = isResponder || isAssigned || (isAdmin && incident.status === 'OPEN');
   const canDelete = isAdmin || (incident.reportedBy && user && incident.reportedBy._id === user._id);
 
   return (

@@ -4,7 +4,7 @@ const Notification = require('../models/Notification');
 const getUserNotifications = async (req, res) => {
   try {
     const { unreadOnly } = req.query;
-    const query = { user: req.user.id };
+    const query = { user: req.user._id };
 
     if (unreadOnly === 'true') {
       query.read = false;
@@ -15,7 +15,7 @@ const getUserNotifications = async (req, res) => {
       .limit(50); // Limit to last 50 notifications
 
     const unreadCount = await Notification.countDocuments({
-      user: req.user.id,
+      user: req.user._id,
       read: false
     });
 
@@ -36,13 +36,13 @@ const markAsRead = async (req, res) => {
 
     if (id === 'all') {
       await Notification.updateMany(
-        { user: req.user.id, read: false },
+        { user: req.user._id, read: false },
         { read: true }
       );
     } else {
       const notification = await Notification.findOne({
         _id: id,
-        user: req.user.id
+        user: req.user._id
       });
 
       if (!notification) {

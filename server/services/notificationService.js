@@ -13,9 +13,14 @@ const createNotification = async (userId, type, incidentId, title, message, prio
       priority
     });
 
-    // Socket.io emission (if available globally)
-    // We'll handle this in the controller or via a global io instance
-    // Ideally, we access io here if attached to app/global
+    try {
+      const io = require('../socket').getIO();
+      if (io) {
+        io.to(userId.toString()).emit('notification', notification);
+      }
+    } catch (socketError) {
+      console.error('Socket emit error (can be ignored if during setup):', socketError.message);
+    }
 
     return notification;
   } catch (error) {
@@ -30,15 +35,19 @@ const notifyIncidentCreated = async (incident) => {
     const User = require('../models/user');
     const admins = await User.find({ role: 'ADMIN', isActive: true });
 
-    const notifications = admins.map(admin =>
-      createNotification(
+    const notifications = admins.map(async (admin) => {
+      await createNotification(
         admin._id,
         'INCIDENT_CREATED',
         incident._id,
         'New Incident Reported',
         `Incident ${incident.incidentNumber} has been created with ${incident.severity} severity: ${incident.title}`
-      )
-    );
+      );
+
+      if (admin.email) {
+        await sendEmail(admin.email, 'incidentCreated', { incident, admin });
+      }
+    });
 
     await Promise.all(notifications);
   } catch (error) {
@@ -122,9 +131,12 @@ const notifyStatusUpdate = async (incident, oldStatus, newStatus) => {
     const notifications = [];
 
     // Notify Reporter
-    if (incident.reporter) {
+    const reporterRef = incident.reportedBy || incident.reporter;
+    const reporterId = reporterRef ? (reporterRef._id || reporterRef) : null;
+
+    if (reporterId) {
       notifications.push(createNotification(
-        incident.reporter._id || incident.reporter,
+        reporterId,
         'INCIDENT_UPDATED',
         incident._id,
         'Incident Status Updated',
@@ -136,7 +148,7 @@ const notifyStatusUpdate = async (incident, oldStatus, newStatus) => {
     const admins = await User.find({ role: 'ADMIN', isActive: true });
     admins.forEach(admin => {
       // Avoid duplicates if admin is reporter
-      if (incident.reporter && admin._id.toString() === (incident.reporter._id || incident.reporter).toString()) return;
+      if (reporterId && admin._id.toString() === reporterId.toString()) return;
 
       notifications.push(createNotification(
         admin._id,

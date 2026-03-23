@@ -13,6 +13,24 @@ const createTransporter = () => {
 
 // Email templates
 const emailTemplates = {
+  incidentCreated: (incident, admin) => ({
+    subject: `🚨 New Incident Reported - ${incident.incidentNumber || 'NEW'}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px;">
+        <h2 style="color: #495057;">New Incident Reported</h2>
+        <p>Hello ${admin.name},</p>
+        <p>A new incident has been reported in the system:</p>
+        <p><strong>Incident Number:</strong> ${incident.incidentNumber || 'Pending'}</p>
+        <p><strong>Title:</strong> ${incident.title}</p>
+        <p><strong>Severity:</strong> ${incident.severity}</p>
+        <p><strong>Priority:</strong> ${incident.priority || 'N/A'}</p>
+        <p><strong>Description:</strong> ${incident.description}</p>
+        <hr>
+        <p>Please review and assign this incident as needed.</p>
+      </div>
+    `
+  }),
+
   slaBreachAlert: (incident) => ({
     subject: `🚨 URGENT: SLA BREACH - Incident ${incident.incidentNumber}`,
     html: `

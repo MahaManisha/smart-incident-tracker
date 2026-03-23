@@ -108,19 +108,27 @@ const calculateDeadlines = (policy, incident) => {
  */
 const attachSLA = async (incident) => {
   const policy = await findApplicableSLA(incident);
+  
+  // Calculate deadlines using either the found policy or the priority-based fallback
+  const { responseDeadline, resolutionDeadline } = calculateDeadlines(policy, incident);
+
   if (policy) {
-    const { responseDeadline, resolutionDeadline } = calculateDeadlines(policy, incident);
-
     incident.slaPolicy = policy._id;
-    incident.slaResponseDeadline = responseDeadline;
-    incident.slaResolutionDeadline = resolutionDeadline;
+  }
+  
+  // Always set deadlines based on priority even if no DB policy exists
+  incident.slaResponseDeadline = responseDeadline;
+  incident.slaResolutionDeadline = resolutionDeadline;
 
-    // Reset statuses
-    incident.slaResponseStatus = 'PENDING';
-    incident.slaResolutionStatus = 'PENDING';
-    incident.slaStatus = 'PENDING';
+  // Reset statuses
+  incident.slaResponseStatus = 'PENDING';
+  incident.slaResolutionStatus = 'PENDING';
+  incident.slaStatus = 'PENDING';
 
-    console.log(`Attached SLA '${policy.name}' to Incident ${incident._id}`);
+  if (policy) {
+    console.log(`Attached SLA policy '${policy.name}' to Incident ${incident._id}`);
+  } else {
+    console.log(`Attached default priority-based SLA to Incident ${incident._id}`);
   }
 };
 

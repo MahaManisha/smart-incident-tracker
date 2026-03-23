@@ -13,8 +13,8 @@ router.delete('/services/:id', verifyToken, isResponderOrAdmin, serviceControlle
 // Dependency Routes
 router.get('/graph', verifyToken, dependencyController.getGraph);
 router.get('/dependencies', verifyToken, dependencyController.getAllDependencies);
-router.post('/dependencies', verifyToken, isAdmin, dependencyController.createDependency);
-router.delete('/dependencies/:id', verifyToken, isAdmin, dependencyController.deleteDependency);
+router.post('/dependencies', verifyToken, isResponderOrAdmin, dependencyController.createDependency);
+router.delete('/dependencies/:id', verifyToken, isResponderOrAdmin, dependencyController.deleteDependency);
 
 // Impact Analysis
 router.get('/services/:serviceId/impact', verifyToken, dependencyController.getImpactAnalysis);

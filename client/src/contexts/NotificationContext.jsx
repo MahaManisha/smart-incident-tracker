@@ -21,8 +21,8 @@ export const NotificationProvider = ({ children }) => {
     if (!user) return;
     try {
       const response = await axiosInstance.get('/notifications?unreadOnly=false'); // Fetch all on load
-      setNotifications(response.data?.notifications || []);
-      setUnreadCount(response.data?.unreadCount || 0);
+      setNotifications(response?.notifications || []);
+      setUnreadCount(response?.unreadCount || 0);
     } catch (error) {
       console.error('Failed to fetch notifications:', error);
     }
@@ -36,14 +36,8 @@ export const NotificationProvider = ({ children }) => {
       const newSocket = io('http://localhost:5000'); // Ensure matches backend
       setSocket(newSocket);
 
-      // Listen for notifications
-      // Based on notificationService, we need to know what event is emitted.
-      // Wait, notificationService just creates DB entries. Who emits socket?
-      // The implementation plan mentioned socket, but I didn't add emission logic to notificationService yet!
-      // I should update notificationService to emit socket events, or rely on a "notification" event.
-      // Let's assume the backend will emit 'notification' event.
-      // I need to go back and fix notificationService to emit events?
-      // Or maybe I can add it now.
+      // Join user specific room to receive personalized notifications
+      newSocket.emit('join_user_room', user._id || user.id);
 
       newSocket.on('notification', (notification) => {
         setNotifications((prev) => [notification, ...prev]);
