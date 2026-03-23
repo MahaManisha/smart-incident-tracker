@@ -261,7 +261,21 @@ const userValidation = {
       .trim(),
     body('profileImage')
       .optional()
-      .trim() // Allow string URL or base64
+      .trim(),
+    body('notificationPreferences')
+      .optional()
+      .isObject(),
+    body('isAway')
+      .optional()
+      .isBoolean(),
+    body('awayRouteTo')
+      .optional()
+      .custom((value) => {
+        if (value && !mongoose.Types.ObjectId.isValid(value)) {
+          throw new Error('Invalid user ID for re-routing');
+        }
+        return true;
+      })
   ],
 
   changePassword: [

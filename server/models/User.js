@@ -21,6 +21,15 @@ const userSchema = new mongoose.Schema(
     },
     teamId: { type: mongoose.Schema.Types.ObjectId, ref: "Team", default: null },
     isActive: { type: Boolean, default: true }, // soft delete flag
+    
+    // Industrial Upgrade: Granular Notification Preferences & Routing
+    notificationPreferences: {
+      emailThreshold: { type: String, enum: ['ALL', 'P3_AND_ABOVE', 'P2_AND_ABOVE', 'P1_AND_ABOVE', 'P0_ONLY', 'NONE'], default: 'ALL' },
+      smsThreshold: { type: String, enum: ['ALL', 'P3_AND_ABOVE', 'P2_AND_ABOVE', 'P1_AND_ABOVE', 'P0_ONLY', 'NONE'], default: 'P0_ONLY' },
+      pushThreshold: { type: String, enum: ['ALL', 'P3_AND_ABOVE', 'P2_AND_ABOVE', 'P1_AND_ABOVE', 'P0_ONLY', 'NONE'], default: 'P1_AND_ABOVE' },
+    },
+    isAway: { type: Boolean, default: false },
+    awayRouteTo: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null }
   },
   { timestamps: true }
 );

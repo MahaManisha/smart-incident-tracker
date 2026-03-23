@@ -227,6 +227,33 @@ const updateProfile = async (req, res) => {
 
     if (name) user.name = name;
 
+    // Industrial Upgrade: Allow user to update notification preferences
+    if (req.body.notificationPreferences) {
+      try {
+        let prefs = typeof req.body.notificationPreferences === 'string' 
+          ? JSON.parse(req.body.notificationPreferences) 
+          : req.body.notificationPreferences;
+        
+        if (prefs.emailThreshold) user.notificationPreferences.emailThreshold = prefs.emailThreshold;
+        if (prefs.smsThreshold) user.notificationPreferences.smsThreshold = prefs.smsThreshold;
+        if (prefs.pushThreshold) user.notificationPreferences.pushThreshold = prefs.pushThreshold;
+      } catch (e) {
+        console.error("Error parsing notificationPreferences:", e);
+      }
+    }
+
+    // Industrial Upgrade: Allow user to update Away status and routing
+    if (req.body.isAway !== undefined) {
+      let isAway = req.body.isAway;
+      if (typeof isAway === 'string') isAway = isAway === 'true';
+      user.isAway = isAway;
+      if (isAway && req.body.awayRouteTo) {
+        user.awayRouteTo = req.body.awayRouteTo;
+      } else {
+        user.awayRouteTo = null;
+      }
+    }
+
     // Handle image upload
     if (req.file) {
       // Create relative path for frontend access (e.g., "uploads/user-123.jpg")

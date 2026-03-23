@@ -1,26 +1,49 @@
 import { useState, useEffect } from 'react';
 import Modal from '../common/Modal';
 import Button from '../common/Button';
-import { updateUserProfile } from '../../api/userApi';
+import { updateUserProfile, getResponders } from '../../api/userApi';
 import { toast } from 'react-toastify';
 import { FaUser } from 'react-icons/fa';
 
 const EditProfileModal = ({ user, isOpen, onClose, onSuccess }) => {
     const [formData, setFormData] = useState({
         name: '',
-        // Avatar file placeholder
-        avatar: null
+        avatar: null,
+        isAway: false,
+        awayRouteTo: '',
+        notificationPreferences: {
+            emailThreshold: 'ALL',
+            smsThreshold: 'P0_ONLY',
+            pushThreshold: 'P1_AND_ABOVE'
+        }
     });
+
+    const [responders, setResponders] = useState([]);
 
     const [previewUrl, setPreviewUrl] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
     useEffect(() => {
+        if (isOpen) {
+            getResponders()
+                .then(res => setResponders(res.users || res.data?.users || []))
+                .catch(err => console.error("Could not fetch responders", err));
+        }
+    }, [isOpen]);
+
+    useEffect(() => {
         if (user && isOpen) {
             setFormData({
                 name: user.name || '',
-                avatar: null
+                avatar: null,
+                isAway: user.isAway || false,
+                awayRouteTo: user.awayRouteTo || '',
+                notificationPreferences: user.notificationPreferences || {
+                    emailThreshold: 'ALL',
+                    smsThreshold: 'P0_ONLY',
+                    pushThreshold: 'P1_AND_ABOVE'
+                }
             });
             setPreviewUrl(null); // Reset preview
             setError(null);
@@ -28,8 +51,19 @@ const EditProfileModal = ({ user, isOpen, onClose, onSuccess }) => {
     }, [user, isOpen]);
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        const { name, value, type, checked } = e.target;
+        if (name.startsWith('notification_')) {
+            const field = name.split('_')[1];
+            setFormData(prev => ({
+                ...prev,
+                notificationPreferences: {
+                    ...prev.notificationPreferences,
+                    [field]: value
+                }
+            }));
+        } else {
+            setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+        }
     };
 
     const handleFileChange = (e) => {
@@ -52,6 +86,12 @@ const EditProfileModal = ({ user, isOpen, onClose, onSuccess }) => {
             const payload = new FormData();
             if (formData.name) payload.append('name', formData.name);
             if (formData.avatar) payload.append('profileImage', formData.avatar);
+            
+            payload.append('isAway', formData.isAway);
+            if (formData.isAway && formData.awayRouteTo) {
+                payload.append('awayRouteTo', formData.awayRouteTo);
+            }
+            payload.append('notificationPreferences', JSON.stringify(formData.notificationPreferences));
 
             await updateUserProfile(payload);
 
@@ -151,6 +191,100 @@ const EditProfileModal = ({ user, isOpen, onClose, onSuccess }) => {
                     </div>
                 </div>
 
+                <hr style={{margin: '20px 0', border: 'none', borderTop: '1px solid #e2e8f0'}}/>
+                <h4 style={{marginBottom: '15px'}}>Notification Preferences</h4>
+
+                <div className="form-row">
+                    <div className="form-group third-width">
+                        <label className="form-label">Email Alerts</label>
+                        <select
+                            name="notification_emailThreshold"
+                            className="form-input"
+                            value={formData.notificationPreferences.emailThreshold}
+                            onChange={handleChange}
+                            disabled={loading}
+                        >
+                            <option value="ALL">All Events</option>
+                            <option value="P3_AND_ABOVE">P3 and Above</option>
+                            <option value="P2_AND_ABOVE">P2 and Above</option>
+                            <option value="P1_AND_ABOVE">P1 and Above</option>
+                            <option value="P0_ONLY">P0 Only</option>
+                            <option value="NONE">None</option>
+                        </select>
+                    </div>
+                    <div className="form-group third-width">
+                        <label className="form-label">SMS Alerts</label>
+                        <select
+                            name="notification_smsThreshold"
+                            className="form-input"
+                            value={formData.notificationPreferences.smsThreshold}
+                            onChange={handleChange}
+                            disabled={loading}
+                        >
+                            <option value="ALL">All Events</option>
+                            <option value="P3_AND_ABOVE">P3 and Above</option>
+                            <option value="P2_AND_ABOVE">P2 and Above</option>
+                            <option value="P1_AND_ABOVE">P1 and Above</option>
+                            <option value="P0_ONLY">P0 Only</option>
+                            <option value="NONE">None</option>
+                        </select>
+                    </div>
+                    <div className="form-group third-width">
+                        <label className="form-label">Push Alerts</label>
+                        <select
+                            name="notification_pushThreshold"
+                            className="form-input"
+                            value={formData.notificationPreferences.pushThreshold}
+                            onChange={handleChange}
+                            disabled={loading}
+                        >
+                            <option value="ALL">All Events</option>
+                            <option value="P3_AND_ABOVE">P3 and Above</option>
+                            <option value="P2_AND_ABOVE">P2 and Above</option>
+                            <option value="P1_AND_ABOVE">P1 and Above</option>
+                            <option value="P0_ONLY">P0 Only</option>
+                            <option value="NONE">None</option>
+                        </select>
+                    </div>
+                </div>
+
+                <hr style={{margin: '20px 0', border: 'none', borderTop: '1px solid #e2e8f0'}}/>
+                <h4 style={{marginBottom: '15px'}}>Availability & Routing</h4>
+
+                <div className="form-group">
+                    <label className="form-label" style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+                        <input
+                            type="checkbox"
+                            name="isAway"
+                            checked={formData.isAway}
+                            onChange={handleChange}
+                            disabled={loading}
+                            style={{width: 'auto', transform: 'scale(1.2)'}}
+                        />
+                        Away / Do Not Disturb (Auto-routes tickets)
+                    </label>
+                </div>
+
+                {formData.isAway && (
+                    <div className="form-group">
+                        <label className="form-label">Re-route my tickets to:</label>
+                        <select
+                            name="awayRouteTo"
+                            className="form-input"
+                            value={formData.awayRouteTo}
+                            onChange={handleChange}
+                            disabled={loading}
+                        >
+                            <option value="">Select a team member...</option>
+                            {responders.filter(r => r._id !== user._id).map(responder => (
+                                <option key={responder._id} value={responder._id}>
+                                    {responder.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                )}
+
                 {error && <div className="form-error-banner">{error}</div>}
             </form>
 
@@ -210,6 +344,9 @@ const EditProfileModal = ({ user, isOpen, onClose, onSuccess }) => {
           gap: 16px;
         }
         .half-width {
+          flex: 1;
+        }
+        .third-width {
           flex: 1;
         }
         .read-only {

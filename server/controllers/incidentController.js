@@ -123,6 +123,19 @@ const createIncident = async (req, res) => {
           });
         }
 
+        // Industrial Upgrade: Away / Do Not Disturb Auto-routing
+        const assignedUserDoc = await User.findById(selectedUserId);
+        if (assignedUserDoc && assignedUserDoc.isAway && assignedUserDoc.awayRouteTo) {
+          const routeToUser = await User.findOne({
+            _id: assignedUserDoc.awayRouteTo,
+            role: 'RESPONDER',
+            isActive: true
+          });
+          if (routeToUser) {
+            selectedUserId = routeToUser._id;
+          }
+        }
+
         incident.assignedTo = selectedUserId;
         incident.assignedAt = new Date();
         incident.status = 'ASSIGNED';
@@ -525,6 +538,20 @@ const assignIncident = async (req, res) => {
       if (!responder) {
         return res.status(400).json({ message: 'Invalid responder or responder not found' });
       }
+
+      // Industrial Upgrade: Away / Do Not Disturb Auto-routing
+      if (responder.isAway && responder.awayRouteTo) {
+        const routeToUser = await User.findOne({
+          _id: responder.awayRouteTo,
+          role: 'RESPONDER',
+          isActive: true
+        });
+        if (routeToUser) {
+          responder = routeToUser; // Swap the actual responder object
+          responderId = routeToUser._id; // Update responderId
+        }
+      }
+
       incident.assignedTo = responderId;
     }
 
