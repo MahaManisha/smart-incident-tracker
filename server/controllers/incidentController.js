@@ -182,7 +182,7 @@ const createIncident = async (req, res) => {
 
     // Attach Escalation Policy
     try {
-      await escalationService.attachDefaultPolicy(incident);
+      await escalationService.assignPolicyToIncident(incident);
     } catch (escError) {
       console.error('Failed to attach escalation policy:', escError);
     }

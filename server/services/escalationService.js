@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+const cron = require('node-cron');
 const Incident = require('../models/Incident');
 const EscalationPolicy = require('../models/EscalationPolicy');
 const OnCallSchedule = require('../models/OnCallSchedule');
@@ -7,18 +9,97 @@ const { sendEmail } = require('./emailService'); // Assuming this exists for not
 const { createNotification } = require('./notificationService');
 
 /**
- * Attaches the default escalation policy to an incident and calculates the first threshold.
+ * Evaluate a single condition against an incident
  */
-const attachDefaultPolicy = async (incident) => {
-    try {
-        const policy = await EscalationPolicy.findOne({ isDefault: true }) || await EscalationPolicy.findOne();
-        if (!policy) return;
+const evaluateCondition = async (incident, condition) => {
+    const { field, operator, value } = condition;
+    
+    let incidentValue = null;
+    
+    if (field === 'priority') incidentValue = incident.priority;
+    if (field === 'status') incidentValue = incident.status;
+    if (field === 'service') {
+        const Service = require('../models/Service');
+        if (incident.serviceId) {
+            const service = await Service.findById(incident.serviceId);
+            incidentValue = service ? service.name : null;
+        } else if (incident.affectedService) {
+            incidentValue = incident.affectedService;
+        }
+    }
+    
+    // Auto-match weekend rule
+    if (operator === 'IS_WEEKEND') {
+        const day = new Date().getDay();
+        const isWeekend = (day === 0 || day === 6);
+        return value === 'TRUE' ? isWeekend : !isWeekend;
+    }
 
-        incident.escalationPolicy = policy._id;
+    if (incidentValue === null || incidentValue === undefined) return false;
+
+    // String comparison
+    const valString = String(value).toUpperCase();
+    const targetString = String(incidentValue).toUpperCase();
+
+    switch (operator) {
+        case 'EQUALS': return targetString === valString;
+        case 'NOT_EQUALS': return targetString !== valString;
+        case 'CONTAINS': return targetString.includes(valString);
+        default: return false;
+    }
+};
+
+/**
+ * Attaches the appropriate escalation policy to an incident based on conditions.
+ */
+const assignPolicyToIncident = async (incident) => {
+    try {
+        const policies = await EscalationPolicy.find();
+        if (policies.length === 0) return;
+
+        let matchedPolicy = null;
+        let defaultPolicy = null;
+
+        for (const policy of policies) {
+            if (policy.isDefault) defaultPolicy = policy;
+
+            if (policy.routingLogic === 'CUSTOM') {
+                matchedPolicy = policy;
+                break;
+            }
+
+            if (policy.conditions && policy.conditions.length > 0) {
+                let match = false;
+                
+                if (policy.routingLogic === 'ALL') {
+                    match = true;
+                    for (const cond of policy.conditions) {
+                        const condMatch = await evaluateCondition(incident, cond);
+                        if (!condMatch) { match = false; break; }
+                    }
+                } else if (policy.routingLogic === 'ANY') {
+                    match = false;
+                    for (const cond of policy.conditions) {
+                        const condMatch = await evaluateCondition(incident, cond);
+                        if (condMatch) { match = true; break; }
+                    }
+                }
+
+                if (match) {
+                    matchedPolicy = policy;
+                    break;
+                }
+            }
+        }
+
+        const policyToApply = matchedPolicy || defaultPolicy;
+        if (!policyToApply) return;
+
+        incident.escalationPolicy = policyToApply._id;
         incident.escalationLevel = 1;
         incident.escalationStartedAt = new Date();
 
-        const currentLevel = policy.levels.find(l => l.levelNumber === 1);
+        const currentLevel = policyToApply.levels.find(l => l.levelNumber === 1);
         if (currentLevel) {
             const nextAt = new Date();
             nextAt.setMinutes(nextAt.getMinutes() + currentLevel.escalateAfterMinutes);
@@ -26,7 +107,7 @@ const attachDefaultPolicy = async (incident) => {
         }
 
         await incident.save();
-        await logAudit('Escalation system initialized', null, incident._id, { policy: policy.name });
+        await logAudit('Escalation system initialized', null, incident._id, { policy: policyToApply.name, matchedByRules: !!matchedPolicy });
     } catch (error) {
         console.error('Error attaching escalation policy:', error);
     }
@@ -142,12 +223,13 @@ const escalateIncident = async (incident) => {
 
 // Start the engine
 const startEscalationEngine = () => {
-    console.log('--- Escalation Engine Started (Interval: 1 min) ---');
-    setInterval(processEscalations, 60000);
+    console.log('--- Escalation Engine Cron Job Started (* * * * *) ---');
+    // Run every minute
+    cron.schedule('* * * * *', processEscalations);
 };
 
 module.exports = {
-    attachDefaultPolicy,
+    assignPolicyToIncident,
     startEscalationEngine,
     processEscalations
 };

@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 import { FaLink, FaUnlink, FaArrowRight, FaServer } from 'react-icons/fa';
 import Button from '../common/Button';
 
-const DependencyManager = () => {
+const DependencyManager = ({ onUpdate }) => {
     const [services, setServices] = useState([]);
     const [dependencies, setDependencies] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -52,6 +52,7 @@ const DependencyManager = () => {
             await createDependency(formData);
             toast.success('Dependency mapped successfully');
             fetchData();
+            if (onUpdate) onUpdate();
             setFormData({ ...formData, sourceService: '', dependentService: '' });
         } catch (error) {
             toast.error(error.message || 'Failed to create dependency');
@@ -64,6 +65,7 @@ const DependencyManager = () => {
             await deleteDependency(id);
             toast.success('Dependency removed');
             fetchData();
+            if (onUpdate) onUpdate();
         } catch (error) {
             toast.error('Failed to remove dependency');
         }

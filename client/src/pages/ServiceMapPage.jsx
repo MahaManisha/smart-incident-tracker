@@ -14,10 +14,15 @@ import DependencyManager from '../components/incidents/DependencyManager';
 import { getGraph, getImpactAnalysis } from '../api/mappingApi';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
-import { FaServer, FaInfoCircle, FaLink, FaProjectDiagram } from 'react-icons/fa';
+import { FaServer, FaInfoCircle, FaLink, FaProjectDiagram, FaExclamationTriangle, FaArrowRight } from 'react-icons/fa';
+import Button from '../components/common/Button';
+import { useAuth } from '../contexts/AuthContext';
+import { USER_ROLES } from '../utils/constants';
 import './ServiceMapPage.css';
 
 const ServiceMapPage = () => {
+    const { hasRole } = useAuth();
+    const isAdmin = hasRole(USER_ROLES.ADMIN);
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
     const [loading, setLoading] = useState(true);
@@ -155,30 +160,35 @@ const ServiceMapPage = () => {
     return (
         <Layout>
             <div className="service-map-page">
-                <div className="page-header mb-8">
-                    <div className="flex justify-between items-end w-full">
-                        <div>
-                            <h1 className="page-title">Infrastructure Dependency Map</h1>
-                            <p className="page-description">Visualize real-time service health and failure propagation</p>
-                        </div>
-                        <div className="flex gap-3">
-                            <button 
-                                className="btn-secondary flex items-center gap-2"
-                                onClick={() => setShowInfo(!showInfo)}
-                                title="How it works"
-                            >
-                                <FaInfoCircle /> INFO
-                            </button>
-                            <button 
-                                className={`btn-${showManager ? 'primary' : 'secondary'} flex items-center gap-2`}
+                <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', width: '100%', marginBottom: '32px' }}>
+                    <div>
+                        <h1 className="page-title">Infrastructure Dependency Map</h1>
+                        <p className="page-description" style={{ color: 'var(--slate-500)', marginTop: '4px' }}>Visualize real-time service health and failure propagation</p>
+                    </div>
+                    <div className="map-actions" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                        <Button 
+                            className="map-action-btn-premium map-btn-info"
+                            onClick={() => setShowInfo(!showInfo)}
+                            title="How it works"
+                            icon={<FaInfoCircle />}
+                        >
+                            INFO
+                        </Button>
+                        {isAdmin && (
+                            <Button 
+                                className={`map-action-btn-premium map-btn-manage ${showManager ? 'active' : ''}`}
                                 onClick={() => setShowManager(!showManager)}
+                                icon={<FaServer />}
                             >
-                                <FaServer /> {showManager ? 'HIDE MANAGER' : 'MANAGE RELATIONSHIPS'}
-                            </button>
-                            <button className="btn-secondary" onClick={fetchGraphData}>
-                                REFRESH LIVE STATUS
-                            </button>
-                        </div>
+                                {showManager ? 'HIDE MANAGER' : 'MANAGE RELATIONSHIPS'}
+                            </Button>
+                        )}
+                        <Button 
+                            className="map-action-btn-premium map-btn-refresh"
+                            onClick={fetchGraphData}
+                        >
+                            REFRESH LIVE STATUS
+                        </Button>
                     </div>
                 </div>
 
@@ -210,7 +220,7 @@ const ServiceMapPage = () => {
 
                 {showManager && (
                     <div className="manager-overlay-container">
-                        <DependencyManager />
+                        <DependencyManager onUpdate={fetchGraphData} />
                     </div>
                 )}
 
@@ -234,17 +244,19 @@ const ServiceMapPage = () => {
                                     <h3 className="text-xl font-bold text-white mb-2">No Infrastructure Mapped</h3>
                                     <p className="text-gray-400 max-w-md">Your dependency map is currently empty. Start by registering your services and then define their connections.</p>
                                 </div>
-                                <div className="flex gap-4">
-                                    <Link to="/services" className="btn-primary flex items-center gap-2">
+                                <div className="flex gap-4" style={{ display: 'flex', gap: '16px', marginTop: '20px' }}>
+                                    <Link to="/services" className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
                                         <FaServer /> GO TO INVENTORY
                                     </Link>
-                                    <button className="btn-secondary" onClick={() => setShowManager(true)}>
-                                        ADD RELATIONSHIPS
-                                    </button>
+                                    {isAdmin && (
+                                        <Button variant="secondary" onClick={() => setShowManager(true)}>
+                                            ADD RELATIONSHIPS
+                                        </Button>
+                                    )}
                                 </div>
                             </div>
                         ) : (
-                            <div className="flex h-full relative">
+                            <div className="flex w-full h-full relative">
                                 <ReactFlow
                                     nodes={nodes}
                                     edges={edges}
