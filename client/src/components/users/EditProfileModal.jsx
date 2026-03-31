@@ -8,6 +8,7 @@ import { FaUser } from 'react-icons/fa';
 const EditProfileModal = ({ user, isOpen, onClose, onSuccess }) => {
     const [formData, setFormData] = useState({
         name: '',
+        phoneNumber: '',
         avatar: null,
         isAway: false,
         awayRouteTo: '',
@@ -36,6 +37,7 @@ const EditProfileModal = ({ user, isOpen, onClose, onSuccess }) => {
         if (user && isOpen) {
             setFormData({
                 name: user.name || '',
+                phoneNumber: user.phoneNumber || '',
                 avatar: null,
                 isAway: user.isAway || false,
                 awayRouteTo: user.awayRouteTo || '',
@@ -85,6 +87,7 @@ const EditProfileModal = ({ user, isOpen, onClose, onSuccess }) => {
             // 1. Prepare Update Data using FormData
             const payload = new FormData();
             if (formData.name) payload.append('name', formData.name);
+            if (formData.phoneNumber !== undefined) payload.append('phoneNumber', formData.phoneNumber);
             if (formData.avatar) payload.append('profileImage', formData.avatar);
             
             payload.append('isAway', formData.isAway);
@@ -157,18 +160,32 @@ const EditProfileModal = ({ user, isOpen, onClose, onSuccess }) => {
                     </div>
                 </div>
 
-                {/* Name Field (Editable) */}
-                <div className="form-group">
-                    <label className="form-label required">Full Name</label>
-                    <input
-                        type="text"
-                        name="name"
-                        className="form-input"
-                        value={formData.name}
-                        onChange={handleChange}
-                        placeholder="John Doe"
-                        disabled={loading}
-                    />
+                {/* Name and Phone Fields (Editable) */}
+                <div className="form-row">
+                    <div className="form-group half-width">
+                        <label className="form-label required">Full Name</label>
+                        <input
+                            type="text"
+                            name="name"
+                            className="form-input"
+                            value={formData.name}
+                            onChange={handleChange}
+                            placeholder="John Doe"
+                            disabled={loading}
+                        />
+                    </div>
+                    <div className="form-group half-width">
+                        <label className="form-label">Phone Number</label>
+                        <input
+                            type="text"
+                            name="phoneNumber"
+                            className="form-input"
+                            value={formData.phoneNumber}
+                            onChange={handleChange}
+                            placeholder="+1234567890"
+                            disabled={loading}
+                        />
+                    </div>
                 </div>
 
                 {/* Read-Only Fields */}

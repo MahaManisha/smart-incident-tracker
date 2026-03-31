@@ -226,6 +226,19 @@ const updateProfile = async (req, res) => {
     // STRICT: Only allow name and profileImage updates
 
     if (name) user.name = name;
+    
+    // Industrial Upgrade: Allow user to update phone number
+    if (req.body.phoneNumber !== undefined) {
+      const phoneRegex = /^\+?[0-9]{7,15}$/;
+      if (req.body.phoneNumber && req.body.phoneNumber.trim() !== "") {
+        if (!phoneRegex.test(req.body.phoneNumber.trim())) {
+          return res.status(400).json({ message: 'Invalid phone number format' });
+        }
+        user.phoneNumber = req.body.phoneNumber.trim();
+      } else {
+        user.phoneNumber = ""; // Clear if empty
+      }
+    }
 
     // Industrial Upgrade: Allow user to update notification preferences
     if (req.body.notificationPreferences) {

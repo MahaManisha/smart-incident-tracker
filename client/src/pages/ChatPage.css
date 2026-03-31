@@ -203,6 +203,16 @@
 .other-message .markdown-body pre { background: var(--surface-ground); border: 1px solid var(--border-subtle); }
 .other-message .markdown-body code { background: rgba(0,0,0,0.05); }
 
+/* Force text color for 'my' messages to override any global markdown themes */
+.my-message .markdown-body,
+.my-message .markdown-body p,
+.my-message .markdown-body span,
+.my-message .markdown-body strong,
+.my-message .markdown-body em,
+.my-message .markdown-body a {
+    color: white !important;
+}
+
 /* Input Wrapper */
 .chat-input-wrapper {
     background: var(--surface-card);

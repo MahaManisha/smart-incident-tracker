@@ -153,7 +153,7 @@ const Profile = () => {
               </div>
               <div className="detail-row">
                 <span className="detail-label">Phone</span>
-                <span className="detail-value">{user?.phone || 'Not provided'}</span>
+                <span className="detail-value">{user?.phoneNumber || 'Not provided'}</span>
               </div>
               <div className="detail-row">
                 <span className="detail-label">Department</span>

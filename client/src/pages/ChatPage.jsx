@@ -41,6 +41,13 @@ const ChatPage = () => {
         scrollToBottom();
     }, [messages]);
 
+    // Request Desktop Notification Permission
+    useEffect(() => {
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+    }, []);
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -70,6 +77,31 @@ const ChatPage = () => {
 
         socketRef.current.on('receive_message', (message) => {
             setMessages((prev) => [...prev, message]);
+
+            // Notify if the message is from someone else
+            const senderId = message.sender?._id || message.sender;
+            const currentUserId = user?.id || user?._id;
+
+            if (senderId !== currentUserId) {
+                const senderName = message.sender?.name || 'Team Member';
+                const shortContent = message.content ? 
+                    (message.content.length > 30 ? message.content.substring(0, 30) + '...' : message.content) 
+                    : 'Sent an attachment';
+
+                // In-App Toast
+                toast.info(`Message from ${senderName}: ${shortContent}`, {
+                    position: "bottom-right",
+                    autoClose: 4000
+                });
+
+                // Desktop Browser Notification
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    new Notification(`New Message from ${senderName}`, {
+                        body: shortContent,
+                        icon: '/favicon.ico' // Or any relevant icon path
+                    });
+                }
+            }
         });
 
         return () => {
@@ -136,7 +168,9 @@ const ChatPage = () => {
                 <div className="chat-container">
                     <div className="messages-list">
                         {messages.map((msg, index) => {
-                            const isMe = msg.sender?._id === user?.id || msg.sender === user?.id;
+                            const currentUserId = user?._id || user?.id; // Mongo uses _id
+                            const senderId = msg.sender?._id || msg.sender;
+                            const isMe = String(senderId) === String(currentUserId);
                             const senderName = msg.sender?.name || 'System';
 
                             return (

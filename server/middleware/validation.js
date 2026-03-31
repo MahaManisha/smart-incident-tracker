@@ -262,15 +262,18 @@ const userValidation = {
     body('profileImage')
       .optional()
       .trim(),
+    body('phoneNumber')
+      .optional()
+      .trim(),
     body('notificationPreferences')
-      .optional()
-      .isObject(),
+      .optional(),
     body('isAway')
-      .optional()
-      .isBoolean(),
+      .optional(),
     body('awayRouteTo')
       .optional()
       .custom((value) => {
+        // Must require mongoose
+        const mongoose = require('mongoose');
         if (value && !mongoose.Types.ObjectId.isValid(value)) {
           throw new Error('Invalid user ID for re-routing');
         }
