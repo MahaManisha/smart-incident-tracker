@@ -41,7 +41,7 @@ axiosInstance.interceptors.response.use(
       }
 
       // Return error message from backend
-      const errorMessage = data.message || data.error || 'An error occurred';
+      const errorMessage = data.error || data.message || 'An error occurred';
       return Promise.reject(new Error(errorMessage));
     } else if (error.request) {
       // Network error

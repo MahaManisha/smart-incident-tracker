@@ -134,19 +134,16 @@ const SLAConfigPage = () => {
                                 </span>
                             </div>
                         </div>
-                        {/* Primary Action is handled by Empty State if list is empty */}
-                        {slaPolicies.length > 0 && (
-                            <div className="flex-shrink-0 mb-1">
-                                <Button
-                                    variant="primary"
-                                    onClick={handleCreate}
-                                    icon={<FaPlus />}
-                                    className="whitespace-nowrap shadow-sm"
-                                >
-                                    New Policy
-                                </Button>
-                            </div>
-                        )}
+                        <div className="flex-shrink-0 mb-1">
+                            <Button
+                                variant="primary"
+                                onClick={handleCreate}
+                                icon={<FaPlus />}
+                                className="whitespace-nowrap shadow-sm"
+                            >
+                                New Policy
+                            </Button>
+                        </div>
                     </div>
                 )}
 

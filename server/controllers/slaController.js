@@ -140,13 +140,25 @@ const createSLARule = async (req, res) => {
     });
   } catch (error) {
     console.error('Error creating SLA rule:', error);
+    
+    // Detailed validation errors (Schema)
     if (error.name === 'ValidationError') {
       const messages = Object.values(error.errors).map(val => val.message);
       return res.status(400).json({ message: 'Validation failed', details: messages });
     }
+
+    // Duplicate key errors (MongoDB)
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern)[0];
+      return res.status(400).json({ 
+        message: `An SLA rule with this ${field} already exists.`,
+        error: `Duplicate key error: ${field}`
+      });
+    }
+
     res.status(500).json({
       message: 'Error creating SLA rule',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal Server Error'
     });
   }
 };
@@ -263,7 +275,20 @@ const updateSLARule = async (req, res) => {
     res.json({ message: 'SLA policy updated successfully', slaRule });
   } catch (error) {
     console.error('Error updating SLA rule:', error);
-    res.status(500).json({ message: 'Error updating SLA rule', error: error.message });
+    
+    // Duplicate key errors (MongoDB)
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern)[0];
+      return res.status(400).json({ 
+        message: `An SLA rule with this ${field} already exists.`,
+        error: `Duplicate key error: ${field}`
+      });
+    }
+
+    res.status(500).json({ 
+      message: 'Error updating SLA rule', 
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal Server Error' 
+    });
   }
 };
 

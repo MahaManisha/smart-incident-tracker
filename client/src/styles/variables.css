@@ -134,6 +134,9 @@
   /* 1 for on, 0 for off */
   --transition-fast: calc(150ms * var(--transition-speed)) cubic-bezier(0.4, 0, 0.2, 1);
   --transition-base: calc(200ms * var(--transition-speed)) cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* ===== Gradients ===== */
+  --primary-gradient: linear-gradient(135deg, var(--indigo-600), var(--blue-600));
 }
 
 /* ===== Dark Mode Overrides (Premium SaaS Style) ===== */
