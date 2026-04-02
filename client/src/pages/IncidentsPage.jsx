@@ -11,6 +11,10 @@ import { useSettings } from '../contexts/SettingsContext';
 import { USER_ROLES, INCIDENT_STATUS, SEVERITY } from '../utils/constants';
 import { formatDateTime, formatRelativeTime } from '../utils/formatters';
 import { toast } from 'react-toastify';
+import { 
+  FaSearch, FaFilter, FaPlus, FaCalendarAlt, FaSortAmountDown, 
+  FaExclamationTriangle, FaShieldAlt, FaUser, FaClock, FaHashtag, FaTag
+} from 'react-icons/fa';
 import './IncidentsPage.css';
 
 const IncidentsPage = () => {
@@ -95,21 +99,23 @@ const IncidentsPage = () => {
         <div className="page-header">
           <div>
             <h1 className="page-title">Incidents</h1>
-            <p className="page-description">Manage and track all incidents</p>
+            <p className="page-description">Real-time status and lifecycle management of system incidents</p>
           </div>
           {canCreateIncident && (
             <Button
               variant="primary"
               onClick={() => navigate('/incidents/create')}
+              className="btn-primary"
             >
-              ➕ Create Incident
+              <FaPlus className="btn-icon" /> Create Incident
             </Button>
           )}
         </div>
 
-        {/* Filters */}
+        {/* Professional Filters */}
         <div className="filters-container">
           <div className="filter-group">
+            <FaSearch className="filter-icon" />
             <input
               type="text"
               className="form-input"
@@ -120,13 +126,13 @@ const IncidentsPage = () => {
           </div>
 
           <div className="filter-group">
+            <FaTag className="filter-icon" />
             <select
               className="form-select"
               value={filters.type}
               onChange={(e) => handleFilterChange('type', e.target.value)}
             >
               <option value="">All Types</option>
-              {/* Assuming constant exists, or hardcoding common types for now based on Schema */}
               {["SECURITY", "NETWORK", "HARDWARE", "SOFTWARE", "OTHER"].map((type) => (
                 <option key={type} value={type}>
                   {type}
@@ -136,6 +142,7 @@ const IncidentsPage = () => {
           </div>
 
           <div className="filter-group">
+            <FaFilter className="filter-icon" />
             <select
               className="form-select"
               value={filters.status}
@@ -151,6 +158,7 @@ const IncidentsPage = () => {
           </div>
 
           <div className="filter-group">
+            <FaExclamationTriangle className="filter-icon" />
             <select
               className="form-select"
               value={filters.severity}
@@ -166,41 +174,7 @@ const IncidentsPage = () => {
           </div>
 
           <div className="filter-group">
-            <select
-              className="form-select"
-              value={filters.priority}
-              onChange={(e) => handleFilterChange('priority', e.target.value)}
-            >
-              <option value="">All Priorities</option>
-              {['P0', 'P1', 'P2', 'P3'].map((priority) => (
-                <option key={priority} value={priority}>
-                  {priority}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="filter-group date-filter">
-            <input
-              type="date"
-              className="form-input"
-              value={filters.startDate}
-              onChange={(e) => handleFilterChange('startDate', e.target.value)}
-              placeholder="Start Date"
-            />
-          </div>
-
-          <div className="filter-group date-filter">
-            <input
-              type="date"
-              className="form-input"
-              value={filters.endDate}
-              onChange={(e) => handleFilterChange('endDate', e.target.value)}
-              placeholder="End Date"
-            />
-          </div>
-
-          <div className="filter-group">
+            <FaSortAmountDown className="filter-icon" />
             <select
               className="form-select"
               value={`${filters.sortBy}-${filters.order}`}
@@ -211,8 +185,7 @@ const IncidentsPage = () => {
             >
               <option value="createdAt-desc">Newest First</option>
               <option value="createdAt-asc">Oldest First</option>
-              <option value="priority-asc">Priority (P0 - P3)</option>
-              <option value="priority-desc">Priority (P3 - P0)</option>
+              <option value="priority-asc">Priority (High-Low)</option>
             </select>
           </div>
 
@@ -223,47 +196,47 @@ const IncidentsPage = () => {
               setPagination((prev) => ({ ...prev, page: 1 }));
             }}
           >
-            Clear
+            Reset
           </Button>
         </div>
 
-        {/* Incidents Table */}
+        {/* Incidents Data View */}
         {
           loading ? (
-            <LoadingSpinner text="Loading incidents..." />
+            <LoadingSpinner text="Synchronizing incidents..." />
           ) : incidents.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-state-icon">📋</div>
-              <p className="empty-state-title">No incidents found</p>
+              <div className="empty-state-icon"><FaExclamationTriangle /></div>
+              <p className="empty-state-title">No Incidents Found</p>
               <p className="empty-state-description">
                 {filters.search || filters.status || filters.severity
-                  ? 'Try adjusting your filters'
-                  : 'Create your first incident to get started'}
+                  ? 'Adjust your global filters to see more results'
+                  : 'Your dashboard is clean. No incidents recorded yet.'}
               </p>
               {canCreateIncident && (
                 <Button
                   variant="primary"
                   onClick={() => navigate('/incidents/create')}
                 >
-                  Create Incident
+                  Create Your First Incident
                 </Button>
               )}
             </div>
           ) : (
             <>
               <div className="table-container">
-                <table className={`table ${settings.layout.tableView === 'compact' ? 'table-compact' : ''}`}>
+                <table className="table">
                   <thead>
                     <tr>
-                      <th>ID</th>
+                      <th><FaHashtag style={{ marginRight: '8px' }} />ID</th>
                       <th>Title</th>
-                      <th>Severity</th>
+                      <th><FaShieldAlt style={{ marginRight: '8px' }} />Severity</th>
                       <th>Priority</th>
-                      <th>Escalation</th>
+                      <th>Level</th>
                       <th>Status</th>
-                      <th>Reporter</th>
+                      <th><FaUser style={{ marginRight: '8px' }} />Reporter</th>
                       <th>Responder</th>
-                      <th>Created</th>
+                      <th><FaClock style={{ marginRight: '8px' }} />Created</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -271,11 +244,10 @@ const IncidentsPage = () => {
                       <tr
                         key={incident._id}
                         onClick={() => handleIncidentClick(incident._id)}
-                        style={{ cursor: 'pointer' }}
                       >
                         <td>
                           <span className="incident-number">
-                            {incident.incidentNumber}
+                            #{incident.incidentNumber}
                           </span>
                         </td>
                         <td>
@@ -295,8 +267,8 @@ const IncidentsPage = () => {
                         <td>
                           <StatusBadge status={incident.status} type="status" />
                         </td>
-                        <td>{incident.reportedBy?.name || 'Unknown'}</td>
-                        <td>{incident.assignedTo?.name || '-'}</td>
+                        <td>{incident.reportedBy?.name || '---'}</td>
+                        <td>{incident.assignedTo?.name || '---'}</td>
                         <td>
                           <span
                             className="incident-time"
@@ -311,7 +283,7 @@ const IncidentsPage = () => {
                 </table>
               </div>
 
-              {/* Pagination */}
+              {/* Pagination Section */}
               {pagination.total > pagination.limit && (
                 <div className="pagination">
                   <button
@@ -321,11 +293,10 @@ const IncidentsPage = () => {
                       setPagination((prev) => ({ ...prev, page: prev.page - 1 }))
                     }
                   >
-                    Previous
+                    Previous Page
                   </button>
                   <span className="pagination-info">
-                    Page {pagination.page} of{' '}
-                    {Math.ceil(pagination.total / pagination.limit)}
+                    {pagination.page} of {Math.ceil(pagination.total / pagination.limit)}
                   </span>
                   <button
                     className="pagination-button"
@@ -337,7 +308,7 @@ const IncidentsPage = () => {
                       setPagination((prev) => ({ ...prev, page: prev.page + 1 }))
                     }
                   >
-                    Next
+                    Next Page
                   </button>
                 </div>
               )}
@@ -349,4 +320,4 @@ const IncidentsPage = () => {
   );
 };
 
-export default IncidentsPage;
+export default IncidentsPage;

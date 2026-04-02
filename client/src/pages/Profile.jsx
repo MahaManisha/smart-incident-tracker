@@ -4,7 +4,10 @@ import { useAuth } from '../contexts/AuthContext';
 import axiosInstance from '../api/axiosConfig';
 import ChangePasswordModal from '../components/users/ChangePasswordModal';
 import EditProfileModal from '../components/users/EditProfileModal';
-import { FaLock, FaPen, FaUser, FaArrowLeft } from 'react-icons/fa';
+import { 
+  FaLock, FaPen, FaUser, FaArrowLeft, FaEnvelope, 
+  FaPhone, FaBuilding, FaCalendarAlt, FaShieldAlt, FaClock 
+} from 'react-icons/fa';
 import './Profile.css';
 
 const Profile = () => {
@@ -58,7 +61,7 @@ const Profile = () => {
       <div className="profile-page">
         <div className="loading-container">
           <div className="spinner"></div>
-          <p>Loading profile...</p>
+          <p>Loading your professional profile...</p>
         </div>
       </div>
     );
@@ -76,19 +79,20 @@ const Profile = () => {
 
   return (
     <div className="profile-page">
+      {/* Decorative background is handled via CSS or index.css global class if needed */}
       <div className="profile-container">
         {/* Page Header */}
         <div className="page-header-row">
           <div className="header-titles">
             <h1 className="page-heading">Profile & Account</h1>
-            <p className="page-subheading">Manage your personal information and security settings</p>
+            <p className="page-subheading">Comprehensive view of your professional identity and security</p>
           </div>
           <div className="header-actions">
             <button className="btn btn-secondary" onClick={() => navigate('/dashboard')}>
-              <FaArrowLeft className="btn-icon" /> Back to Dashboard
+              <FaArrowLeft className="btn-icon" /> Dashboard
             </button>
             <button className="btn btn-secondary" onClick={handleChangePasswordClick}>
-              <FaLock className="btn-icon" /> Change Password
+              <FaLock className="btn-icon" /> Password
             </button>
             <button className="btn btn-primary" onClick={handleEditProfileClick}>
               <FaPen className="btn-icon" /> Edit Profile
@@ -96,8 +100,8 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* Identity Card - The "Badge" of the user */}
-        <section className="profile-section identity-card">
+        {/* Identity Card - The Hero Section */}
+        <section className="identity-card">
           <div className="identity-left">
             <div className="avatar-container">
               {user?.profileImage ? (
@@ -114,7 +118,7 @@ const Profile = () => {
               <div className="avatar-placeholder" style={{ display: user?.profileImage ? 'none' : 'flex' }}>
                 <span className="initials">{user?.name?.charAt(0) || 'U'}</span>
               </div>
-              <div className="status-indicator active" title="Account Active"></div>
+              <div className="status-indicator" title="Verified Professional Account"></div>
             </div>
 
             <div className="identity-details">
@@ -129,10 +133,9 @@ const Profile = () => {
           </div>
 
           <div className="identity-right">
-            {/* ID or other quick stats could go here */}
             <div className="account-id">
-              <span className="label">User ID</span>
-              <span className="value">{user?._id?.substring(0, 8) || '---'}</span>
+              <span className="label">User Signature</span>
+              <span className="value">{user?._id?.substring(0, 8).toUpperCase() || '---'}</span>
             </div>
           </div>
         </section>
@@ -140,38 +143,56 @@ const Profile = () => {
         {/* Information Grid */}
         <div className="profile-grid">
           {/* Left Column: Personal Info */}
-          <section className="profile-section info-card">
+          <section className="info-card">
             <h3 className="card-title">Personal Information</h3>
             <div className="detail-list">
               <div className="detail-row">
-                <span className="detail-label"><FaUser className="detail-icon" /> Full Name</span>
+                <span className="detail-label">
+                  <div className="detail-icon-wrapper"><FaUser /></div>
+                  Full Name
+                </span>
                 <span className="detail-value">{user?.name}</span>
               </div>
               <div className="detail-row">
-                <span className="detail-label">Email Address</span>
+                <span className="detail-label">
+                  <div className="detail-icon-wrapper"><FaEnvelope /></div>
+                  Email Address
+                </span>
                 <span className="detail-value">{user?.email}</span>
               </div>
               <div className="detail-row">
-                <span className="detail-label">Phone</span>
+                <span className="detail-label">
+                  <div className="detail-icon-wrapper"><FaPhone /></div>
+                  Phone Number
+                </span>
                 <span className="detail-value">{user?.phoneNumber || 'Not provided'}</span>
               </div>
               <div className="detail-row">
-                <span className="detail-label">Department</span>
-                <span className="detail-value">{user?.department || 'General'}</span>
+                <span className="detail-label">
+                  <div className="detail-icon-wrapper"><FaBuilding /></div>
+                  Department
+                </span>
+                <span className="detail-value">{user?.department || 'General Operations'}</span>
               </div>
             </div>
           </section>
 
           {/* Right Column: Account Metadata */}
-          <section className="profile-section info-card">
-            <h3 className="card-title">Account Metadata</h3>
+          <section className="info-card">
+            <h3 className="card-title">Account Governance</h3>
             <div className="detail-list">
               <div className="detail-row">
-                <span className="detail-label">Account Status</span>
+                <span className="detail-label">
+                  <div className="detail-icon-wrapper"><FaShieldAlt /></div>
+                  Account Status
+                </span>
                 <span className="status-pill active">Active</span>
               </div>
               <div className="detail-row">
-                <span className="detail-label">Member Since</span>
+                <span className="detail-label">
+                  <div className="detail-icon-wrapper"><FaCalendarAlt /></div>
+                  Member Since
+                </span>
                 <span className="detail-value">
                   {user?.createdAt ? new Date(user.createdAt).toLocaleDateString(undefined, {
                     year: 'numeric',
@@ -181,14 +202,20 @@ const Profile = () => {
                 </span>
               </div>
               <div className="detail-row">
-                <span className="detail-label">Last Login</span>
-                <span className="detail-value text-muted">Just now</span>
+                <span className="detail-label">
+                  <div className="detail-icon-wrapper"><FaClock /></div>
+                  Session State
+                </span>
+                <span className="detail-value" style={{ color: 'var(--emerald-500)' }}>Online Now</span>
               </div>
               <div className="detail-row">
-                <span className="detail-label">Role Permissions</span>
+                <span className="detail-label">
+                  <div className="detail-icon-wrapper"><FaShieldAlt /></div>
+                  Permissions
+                </span>
                 <span className="detail-value">
-                  {user?.role === 'ADMIN' ? 'Full Access' :
-                    user?.role === 'RESPONDER' ? 'Manage Incidents' : 'Report Incidents'}
+                  {user?.role === 'ADMIN' ? 'Site Administrator' :
+                    user?.role === 'RESPONDER' ? 'Incident Responder' : 'Standard Reporter'}
                 </span>
               </div>
             </div>
@@ -201,7 +228,7 @@ const Profile = () => {
       <ChangePasswordModal
         isOpen={isChangePasswordModalOpen}
         onClose={() => setIsChangePasswordModalOpen(false)}
-        onSuccess={() => console.log("Password changed")}
+        onSuccess={() => console.log("Password changed successfully")}
       />
 
       <EditProfileModal
@@ -214,4 +241,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default Profile;

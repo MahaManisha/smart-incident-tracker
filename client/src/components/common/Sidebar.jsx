@@ -114,12 +114,6 @@ const Sidebar = ({ isOpen }) => {
       label: 'Templates',
       roles: [USER_ROLES.ADMIN],
     },
-    {
-      path: '/profile',
-      icon: <FaUser />,
-      label: 'Profile',
-      roles: [USER_ROLES.ADMIN, USER_ROLES.RESPONDER, USER_ROLES.REPORTER],
-    },
   ];
 
   return (
