@@ -5,6 +5,25 @@
     z-index: 9999;
 }
 
-.Toastify__toast-container {
-    z-index: 9999;
+.sla-badge-cyan {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 16px;
+    background: rgba(0, 243, 255, 0.05);
+    border: 1px solid var(--accent-cyan);
+    border-radius: 8px;
+    color: var(--accent-cyan);
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 0 15px rgba(0, 243, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.sla-badge-cyan:hover {
+    background: rgba(0, 243, 255, 0.1);
+    box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
+    transform: translateY(-1px);
 }

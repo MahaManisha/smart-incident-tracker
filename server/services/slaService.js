@@ -72,7 +72,7 @@ const calculateDeadlines = (policy, incident) => {
       'P3': { response: 240, resolution: 1440 }
     };
     const times = priorityTimes[incident.priority] || priorityTimes['P3'];
-    const startTime = incident.reportedAt ? new Date(incident.reportedAt) : new Date();
+    const startTime = incident.reportedAt || incident.createdAt || new Date();
 
     return {
       responseDeadline: new Date(startTime.getTime() + times.response * 60000),
@@ -88,7 +88,7 @@ const calculateDeadlines = (policy, incident) => {
 
   if (!target) return { response: null, resolution: null };
 
-  const startTime = incident.reportedAt ? new Date(incident.reportedAt) : new Date();
+  const startTime = incident.reportedAt || incident.createdAt || new Date();
 
   // Future: Handle Business Hours / Calendar here
   // For now: Simple 24/7 add
@@ -174,8 +174,8 @@ const checkSLABreached = (incident) => {
  * Helper: Calculate Resolution Time in Minutes
  */
 const calculateResolutionTime = (incident) => {
-  if (!incident.reportedAt || !incident.resolvedAt) return null;
-  const start = new Date(incident.reportedAt).getTime();
+  const startTime = incident.reportedAt || incident.createdAt || new Date();
+  const start = new Date(startTime).getTime();
   const end = new Date(incident.resolvedAt).getTime();
   return (end - start) / 60000; // minutes
 };

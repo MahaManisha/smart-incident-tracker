@@ -13,6 +13,7 @@ import Layout from '../components/common/Layout';
 import SLAList from '../components/sla/SLAList';
 import SLAForm from '../components/sla/SLAForm';
 import { FaPlus, FaShieldAlt } from 'react-icons/fa';
+import './SLAConfigPage.css';
 
 const SLAConfigPage = () => {
     const { hasRole } = useAuth();
@@ -123,13 +124,13 @@ const SLAConfigPage = () => {
                                 Define response and resolution rules that govern how incidents are handled across the system.
                             </p>
                             <div className="flex items-center gap-3 mt-4 ml-9">
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                <span className="sla-badge-cyan">
                                     Admin Only
                                 </span>
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
+                                <span className="sla-badge-cyan">
                                     Applied Automatically
                                 </span>
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700">
+                                <span className="sla-badge-cyan">
                                     Priority-Based Matching
                                 </span>
                             </div>

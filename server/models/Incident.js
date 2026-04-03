@@ -113,6 +113,12 @@ const incidentSchema = new mongoose.Schema(
       type: Date,
       default: null
     },
+    
+    reportedAt: { // User-facing timestamp for incident report
+      type: Date,
+      default: Date.now,
+      index: true
+    },
 
     // SLA Tracking Fields
     slaPolicy: {

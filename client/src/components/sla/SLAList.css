@@ -136,18 +136,19 @@
 
 .sla-pill {
     padding: 4px 12px;
-    background: var(--slate-50);
-    border: 1px solid var(--slate-200);
+    background: rgba(0, 243, 255, 0.05);
+    border: 1px solid rgba(0, 243, 255, 0.2);
     border-radius: var(--radius-md);
-    color: var(--slate-700);
+    color: var(--accent-cyan);
     font-size: 11px;
-    font-weight: var(--font-weight-semibold);
+    font-weight: 800;
 }
 
 .sla-pill.primary {
-    background: var(--blue-50);
-    border-color: var(--blue-100);
-    color: var(--blue-700);
+    background: rgba(0, 243, 255, 0.1);
+    border-color: var(--accent-cyan);
+    color: var(--accent-cyan);
+    box-shadow: 0 0 10px rgba(0, 243, 255, 0.1);
 }
 
 /* Target Table Grid */
@@ -193,8 +194,8 @@
 /* Footer & Actions */
 .sla-card-footer {
     padding: var(--spacing-lg) var(--spacing-xl);
-    background: var(--slate-50);
-    border-top: 1px solid var(--slate-100);
+    background: rgba(255, 255, 255, 0.03);
+    border-top: 1px solid var(--border-color);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -218,17 +219,20 @@
     align-items: center;
     justify-content: center;
     border-radius: var(--radius-md);
-    border: 1px solid var(--slate-200);
-    background: white;
-    color: var(--slate-700);
+    border: 1px solid rgba(0, 243, 255, 0.3);
+    background: rgba(0, 243, 255, 0.05);
+    color: var(--accent-cyan);
     transition: all var(--transition-fast);
 }
 
 .sla-action-btn:hover {
     transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
+    background: rgba(0, 243, 255, 0.15);
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+    color: #fff;
 }
 
-.sla-action-btn.edit:hover { background: var(--blue-50); color: var(--blue-700); border-color: var(--blue-200); }
-.sla-action-btn.delete:hover { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
-.sla-action-btn.toggle:hover { background: #ecfdf5; color: #059669; border-color: #d1fae5; }
+.sla-action-btn.edit:hover { background: rgba(59, 130, 246, 0.2); color: #fff; border-color: var(--blue-400); }
+.sla-action-btn.delete:hover { background: rgba(239, 68, 68, 0.2); color: #fff; border-color: var(--danger-color); }
+.sla-action-btn.toggle:hover { background: rgba(16, 185, 129, 0.2); color: #fff; border-color: var(--success-color); }

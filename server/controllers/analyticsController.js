@@ -317,8 +317,12 @@ const getPriorityMetrics = async (req, res) => {
           totalResolutionTime: {
             $sum: {
               $cond: [
-                { $and: [{ $ne: ['$resolvedAt', null] }, { $ne: ['$reportedAt', null] }] },
-                { $subtract: ['$resolvedAt', '$reportedAt'] },
+                {
+                  $and: [
+                    { $ne: ['$resolvedAt', null] }
+                  ]
+                },
+                { $subtract: ['$resolvedAt', { $ifNull: ['$reportedAt', '$createdAt'] }] },
                 0
               ]
             }

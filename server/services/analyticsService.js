@@ -43,11 +43,7 @@ const getUnifiedDashboardStats = async () => {
       Incident.aggregate([
         {
           $match: {
-            status: { $nin: ['CLOSED', 'Resolved', 'RESOLVED'] } // Exclude resolved/closed for severity distribution if needed, or user said "severityDistribution" - usually current load. 
-            // User Step 3 said: "severityDistribution". Let's assume ALL or Active. Typical dashboard shows active.
-            // Let's stick to Active to match "KPI" logic, or All. Let's do All for distribution to be safe unless specified.
-            // Actually, usually severity distribution implies "Open" incidents.
-            // Let's stick to $ne CLOSED.
+            status: { $nin: ['CLOSED', 'Resolved', 'RESOLVED'] }
           }
         },
         { $group: { _id: { $toUpper: "$severity" }, count: { $sum: 1 } } }
@@ -81,14 +77,14 @@ const getUnifiedDashboardStats = async () => {
       Incident.aggregate([
         {
           $match: {
-            status: { $in: ['RESOLVED', 'CLOSED', 'Resolved', 'Closed'] }, // mixed case safety
+            status: { $in: ['RESOLVED', 'CLOSED', 'Resolved', 'Closed'] },
             resolvedAt: { $gte: thirtyDaysAgo }
           }
         },
         {
           $project: {
             durationMinutes: {
-              $divide: [{ $subtract: ["$resolvedAt", "$createdAt"] }, 60000]
+              $divide: [{ $subtract: ["$resolvedAt", { $ifNull: ["$reportedAt", "$createdAt"] }] }, 60000]
             }
           }
         },
@@ -111,7 +107,7 @@ const getUnifiedDashboardStats = async () => {
         {
           $project: {
             durationMinutes: {
-              $divide: [{ $subtract: ["$resolvedAt", "$createdAt"] }, 60000]
+              $divide: [{ $subtract: ["$resolvedAt", { $ifNull: ["$reportedAt", "$createdAt"] }] }, 60000]
             }
           }
         },
@@ -134,7 +130,7 @@ const getUnifiedDashboardStats = async () => {
         {
           $project: {
             ackDurationMinutes: {
-              $divide: [{ $subtract: ["$assignedAt", "$createdAt"] }, 60000]
+              $divide: [{ $subtract: ["$assignedAt", { $ifNull: ["$reportedAt", "$createdAt"] }] }, 60000]
             }
           }
         },
@@ -157,7 +153,7 @@ const getUnifiedDashboardStats = async () => {
         {
           $project: {
             ackDurationMinutes: {
-              $divide: [{ $subtract: ["$assignedAt", "$createdAt"] }, 60000]
+              $divide: [{ $subtract: ["$assignedAt", { $ifNull: ["$reportedAt", "$createdAt"] }] }, 60000]
             }
           }
         },
@@ -169,12 +165,36 @@ const getUnifiedDashboardStats = async () => {
         }
       ]),
 
-      // 6. Team Performance
+      // 6. Team Performance (Refined with membership lookup)
       Incident.aggregate([
-        { $match: { assignedTeam: { $ne: null } } },
+        // Ensure assignedTeam OR assignedTo exists
+        { $match: { $or: [{ assignedTeam: { $ne: null } }, { assignedTo: { $ne: null } }] } },
+        
+        // Lookup team where the responder is a member
+        {
+          $lookup: {
+            from: "teams",
+            localField: "assignedTo",
+            foreignField: "members",
+            as: "teamMemberships"
+          }
+        },
+        
+        // Determine effective team ID
+        {
+          $addFields: {
+            effectiveTeamId: { 
+              $ifNull: ["$assignedTeam", { $arrayElemAt: ["$teamMemberships._id", 0] }]
+            }
+          }
+        },
+        
+        // Filter out those with NO effective team
+        { $match: { effectiveTeamId: { $ne: null } } },
+
         {
           $group: {
-            _id: "$assignedTeam",
+            _id: "$effectiveTeamId",
             totalIncidents: { $sum: 1 },
             resolvedCount: {
               $sum: { $cond: [{ $in: [{ $toUpper: "$status" }, ["RESOLVED", "CLOSED"]] }, 1, 0] }
@@ -188,18 +208,21 @@ const getUnifiedDashboardStats = async () => {
                   {
                     $and: [
                       { $in: [{ $toUpper: "$status" }, ["RESOLVED", "CLOSED"]] },
-                      { $ne: ["$resolvedAt", null] },
-                      { $ne: ["$createdAt", null] }
+                      { $ne: ["$resolvedAt", null] }
                     ]
                   },
-                  { $divide: [{ $subtract: ["$resolvedAt", "$createdAt"] }, 3600000] }, // Hours
+                  {
+                    $divide: [
+                      { $subtract: ["$resolvedAt", { $ifNull: ["$reportedAt", "$createdAt"] }] },
+                      3600000
+                    ]
+                  },
                   0
                 ]
               }
             }
           }
         },
-        // ... (lookup and project remain same but verified)
         {
           $lookup: {
             from: "teams",
@@ -234,7 +257,8 @@ const getUnifiedDashboardStats = async () => {
               ]
             }
           }
-        }
+        },
+        { $match: { name: { $ne: null } } }
       ])
     ]);
 

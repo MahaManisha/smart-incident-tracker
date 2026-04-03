@@ -22,14 +22,14 @@
 
 /* Dependency Manager Premium Card */
 .dependency-manager-card {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-xl);
     padding: 32px;
     margin-bottom: var(--spacing-2xl);
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+    box-shadow: var(--shadow-lg);
     animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
@@ -55,14 +55,15 @@
 
 /* Info Alert Panel */
 .info-alert-panel {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.95));
-    backdrop-filter: blur(20px);
-    border-left: 5px solid var(--blue-500);
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    border-left: 5px solid var(--primary-color);
+    border: 1px solid var(--border-color);
     border-radius: 16px;
     padding: 24px;
     margin-bottom: 32px;
     position: relative;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-lg), var(--shadow-glow);
     animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -77,7 +78,7 @@
     font-family: var(--font-heading);
     font-size: 1.1rem;
     font-weight: 800;
-    color: var(--slate-900);
+    color: var(--text-primary);
 }
 
 .info-body {
@@ -107,7 +108,7 @@
 
 .info-step p {
     font-size: 0.9rem;
-    color: var(--slate-600);
+    color: var(--text-secondary);
     margin: 0;
     line-height: 1.5;
 }
@@ -156,9 +157,9 @@
 /* Base override for premium selects */
 .form-select-premium {
     width: 100%;
-    background: rgba(248, 250, 252, 0.6);
-    border: 1px solid rgba(226, 232, 240, 0.8);
-    color: var(--slate-800);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
     padding: 12px 16px;
     border-radius: 12px;
     font-size: 0.95rem;
@@ -168,9 +169,9 @@
 }
 
 .form-select-premium:focus {
-    background: white;
-    border-color: var(--blue-400);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 15px rgba(255, 0, 127, 0.2);
     outline: none;
 }
 
@@ -576,12 +577,12 @@
     justify-content: center;
     gap: 32px;
     padding: 16px;
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(226, 232, 240, 0.8);
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--border-color);
     border-radius: 16px;
     margin-top: 24px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+    box-shadow: var(--shadow-md);
     animation: slideUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
 }
 
@@ -591,7 +592,7 @@
     gap: 8px;
     font-size: 0.85rem;
     font-weight: 700;
-    color: var(--slate-700);
+    color: var(--text-secondary);
 }
 
 .dot {

@@ -112,7 +112,7 @@
 }
 
 .sla-step-item.active .sla-step-title {
-  color: var(--primary-color);
+  color: var(--accent-cyan);
   font-weight: var(--font-weight-extrabold);
 }
 
@@ -312,12 +312,13 @@
   display: inline-flex;
   align-items: center;
   padding: 4px 12px;
-  background-color: var(--blue-100);
-  color: var(--blue-700);
-  border: 1px solid var(--blue-200);
+  background-color: rgba(0, 243, 255, 0.08);
+  color: var(--accent-cyan);
+  border: 1px solid rgba(0, 243, 255, 0.3);
   border-radius: var(--radius-full);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
+  backdrop-filter: blur(4px);
 }
 
 .sla-tag-remove {
@@ -350,17 +351,19 @@
 }
 
 .sla-add-btn {
-  background-color: var(--slate-100);
-  color: var(--slate-700);
+  background-color: rgba(0, 243, 255, 0.05);
+  color: var(--accent-cyan);
   padding: 0 var(--spacing-xl);
   border-radius: var(--radius-md);
   font-weight: var(--font-weight-bold);
-  border: 1px solid var(--slate-200);
+  border: 1px solid rgba(0, 243, 255, 0.3);
   transition: all var(--transition-fast);
 }
 
 .sla-add-btn:hover {
-  background-color: var(--slate-200);
+  background-color: rgba(0, 243, 255, 0.15);
+  border-color: var(--accent-cyan);
+  color: #fff;
 }
 
 /* Time Target Cards */
