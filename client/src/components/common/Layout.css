@@ -1,52 +1,165 @@
-/* Layout Container */
-.app-layout {
-    display: flex;
-    height: 100vh;
-    overflow: hidden;
-    background-color: var(--bg-app);
+/* Infinitum Global Layout - Full Cyber Overhaul */
+.infinitum-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  position: relative;
+  font-family: var(--font-sans);
 }
 
-/* Main Content Wrapper */
-.main-wrapper {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    /* No margin-left needed as Sidebar is now a flex item */
-    transition: all var(--transition-base);
+/* --- Global Cyber Background Suite (Exact Same as Landing Page) --- */
+.cyber-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
 }
 
-/* Navbar integration */
-.main-wrapper>nav {
-    flex-shrink: 0;
+.cyber-grid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    linear-gradient(var(--primary-light) 1px, transparent 1px),
+    linear-gradient(90deg, var(--primary-light) 1px, transparent 1px);
+  background-size: 50px 50px;
+  background-position: center center;
+  mask-image: radial-gradient(circle at center, black 0%, transparent 80%);
+  transform: perspective(1000px) rotateX(60deg) translateY(-20%);
+  opacity: 0.3;
+  animation: grid-scroll 20s linear infinite;
 }
 
-/* Main Scrollable Area */
-.main-content {
-    flex: 1;
-    overflow-y: auto;
-    padding: var(--space-6);
-    /* Reduced padding as requested (from space-8) to reduce waste */
+@keyframes grid-scroll {
+  from { background-position: 0 0; }
+  to { background-position: 0 100%; }
 }
 
-/* Content Container */
-.content-container {
-    max-width: 1400px;
-    /* Increased max-width as requested */
-    margin: 0 auto;
-    width: 100%;
+.cyber-particles .particle {
+  position: absolute;
+  background: var(--primary-color);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--primary-color);
+  opacity: 0.5;
+  animation: float-particles 15s linear infinite;
 }
 
-.page-container {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-6);
+.p1 { width: 4px; height: 4px; left: 10%; top: 20%; animation-delay: 0s; }
+.p2 { width: 6px; height: 6px; left: 80%; top: 60%; animation-delay: -5s; }
+.p3 { width: 3px; height: 3px; left: 40%; top: 10%; animation-delay: -10s; }
+.p4 { width: 5px; height: 5px; left: 70%; top: 90%; animation-delay: -2s; }
+
+@keyframes float-particles {
+  0% { transform: translate(0, 0) scale(1); opacity: 0; }
+  20% { opacity: 0.6; }
+  80% { opacity: 0.6; }
+  100% { transform: translate(100px, -200px) scale(0.1); opacity: 0; }
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .main-content {
-        padding: var(--space-4);
-    }
+.cyber-lines .line {
+  position: absolute;
+  background: var(--primary-light);
+  box-shadow: 0 0 10px var(--primary-light);
+}
+
+.l1 { width: 20%; height: 1px; top: 15%; left: -20%; animation: move-line 12s infinite linear; }
+.l2 { width: 15%; height: 1px; top: 45%; right: -15%; animation: move-line-rev 15s infinite linear; }
+.l3 { height: 20%; width: 1px; left: 85%; top: -20%; animation: move-line-vert 18s infinite linear; }
+
+@keyframes move-line {
+  0% { transform: translateX(0); opacity: 0; }
+  100% { transform: translateX(200vw); opacity: 0; }
+}
+
+@keyframes move-line-rev {
+  0% { transform: translateX(0); opacity: 0; }
+  100% { transform: translateX(-200vw); opacity: 0; }
+}
+
+@keyframes move-line-vert {
+  0% { transform: translateY(0); opacity: 0; }
+  100% { transform: translateY(200vh); opacity: 0; }
+}
+
+.cyber-scanlines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%,
+    rgba(0, 0, 0, 0.2) 50%
+  );
+  background-size: 100% 4px;
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0.15;
+}
+
+.cyber-noise {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 5;
+  mix-blend-mode: overlay;
+}
+
+/* --- Layout Structure --- */
+.main-content-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  transition: margin-left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  z-index: 10;
+}
+
+.main-viewport {
+  flex: 1;
+  overflow-y: auto;
+  padding: 30px;
+  background: transparent;
+}
+
+.viewport-container {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  animation: viewportFadeIn 0.8s ease-out;
+}
+
+@keyframes viewportFadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Custom Scrollbar */
+.main-viewport::-webkit-scrollbar {
+  width: 8px;
+}
+
+.main-viewport::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.main-viewport::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+.main-viewport::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-color);
 }

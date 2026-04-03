@@ -1,9 +1,10 @@
-@import 'variables.css';
-@import 'layout.css';
-@import 'buttons.css';
-@import 'forms.css';
-@import 'utilities.css';
-@import 'components.css';
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;800&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+@import './variables.css';
+@import './layout.css';
+@import './buttons.css';
+@import './forms.css';
+@import './utilities.css';
+@import './components.css';
 
 /* Global Resets */
 *,
@@ -19,9 +20,11 @@ body {
   font-size: var(--font-size-base);
   line-height: 1.5;
   color: var(--text-primary);
-  background-color: var(--bg-secondary);
+  background-color: var(--bg-primary); /* Set to Infinitum Black */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  min-height: 100vh;
 }
 
 h1,
@@ -30,9 +33,12 @@ h3,
 h4,
 h5,
 h6 {
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: -0.025em;
-  color: var(--text-primary);
+  font-family: var(--font-heading);
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #fff;
+  text-transform: uppercase;
+  text-shadow: var(--shadow-glow);
 }
 
 p {
@@ -42,10 +48,30 @@ p {
 a {
   color: var(--primary-color);
   text-decoration: none;
-  font-weight: var(--font-weight-medium);
+  font-weight: 600;
   transition: color var(--transition-fast);
 }
 
 a:hover {
   color: var(--primary-hover);
+  text-shadow: var(--shadow-glow);
+}
+
+/* Custom Scrollbar for all elements */
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(255, 0, 127, 0.4);
+  border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-color);
 }

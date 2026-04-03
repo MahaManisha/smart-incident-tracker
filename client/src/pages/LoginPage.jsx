@@ -64,6 +64,12 @@ const LoginPage = () => {
 
   return (
     <div className="auth-layout">
+      {/* Background elements */}
+      <div className="cyber-layout-overlay">
+        <div className="cyber-grid-static"></div>
+        <div className="cyber-scanlines-fixed"></div>
+      </div>
+
       <div className="auth-container">
         <div className="auth-header">
           <div className="auth-logo"><FaBullseye /></div>

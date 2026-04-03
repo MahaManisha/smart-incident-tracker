@@ -1,124 +1,131 @@
-/* Enterprise Button System */
+/* Infinitum Cyber Button Theme */
 .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--space-2);
-    font-family: var(--font-sans);
-    font-weight: 500;
+    gap: 8px;
+    font-family: var(--font-heading);
+    font-weight: 700;
     line-height: 1;
     white-space: nowrap;
-    border-radius: var(--radius-md);
+    border-radius: 4px; /* More angular cyber look */
     border: 1px solid transparent;
-    /* default border for alignment */
-    transition: all var(--transition-fast);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     cursor: pointer;
     user-select: none;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 /* === Variants === */
 
-/* Primary: Indigio Solid */
+/* Primary: Neon Magenta */
 .btn-primary {
-    background-color: var(--color-primary);
+    background: var(--primary-color);
     color: white;
-    border-color: transparent;
-    box-shadow: var(--shadow-sm);
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-glow);
 }
 
 .btn-primary:hover:not(:disabled) {
-    background-color: var(--color-primary-hover);
-    box-shadow: var(--shadow-md);
+    background: var(--primary-hover);
+    box-shadow: 0 0 25px var(--primary-color);
+    transform: translateY(-2px);
 }
 
 .btn-primary:active:not(:disabled) {
     transform: translateY(1px);
+    box-shadow: 0 0 10px var(--primary-color);
 }
 
-/* Secondary: White w/ Border */
+/* Secondary: Dark Cyber with Border */
 .btn-secondary {
-    background-color: var(--bg-surface);
-    color: var(--text-primary);
-    border-color: var(--border-subtle);
-    box-shadow: var(--shadow-xs);
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    border-color: var(--border-color);
+    backdrop-filter: blur(5px);
 }
 
 .btn-secondary:hover:not(:disabled) {
-    background-color: var(--neutral-50);
-    border-color: var(--border-medium);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 0 15px rgba(255, 0, 127, 0.2);
 }
 
-.btn-secondary:active:not(:disabled) {
-    background-color: var(--neutral-100);
-}
-
-/* Outline: Primary Border */
+/* Outline: Cyan Theme for distinction */
 .btn-outline {
-    background-color: transparent;
-    color: var(--color-primary);
-    border-color: var(--color-primary);
+    background: transparent;
+    color: var(--accent-cyan);
+    border-color: var(--accent-cyan);
 }
 
 .btn-outline:hover:not(:disabled) {
-    background-color: var(--primary-50);
+    background: rgba(0, 243, 255, 0.05);
+    box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+    transform: translateY(-2px);
 }
 
-/* Danger: Red */
+/* Danger: Neon Red */
 .btn-danger {
-    background-color: var(--color-danger);
+    background: var(--danger-color);
     color: white;
+    border-color: var(--danger-color);
+    box-shadow: 0 0 15px rgba(255, 62, 62, 0.3);
 }
 
 .btn-danger:hover:not(:disabled) {
-    background-color: #dc2626;
-    /* red-600 */
+    background: #ff5e5e;
+    box-shadow: 0 0 25px rgba(255, 62, 62, 0.5);
+    transform: translateY(-2px);
 }
 
-/* Ghost: No background */
+/* Ghost: Minimal Translucent */
 .btn-ghost {
-    background-color: transparent;
+    background: transparent;
     color: var(--text-secondary);
     border-color: transparent;
 }
 
 .btn-ghost:hover:not(:disabled) {
-    background-color: var(--neutral-100);
-    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
 }
 
 /* === Sizes === */
 .btn-sm {
-    height: 28px;
-    padding: 0 var(--space-3);
-    font-size: var(--font-size-xs);
+    height: 32px;
+    padding: 0 12px;
+    font-size: 0.75rem;
 }
 
 .btn-md {
-    height: 36px;
-    padding: 0 var(--space-4);
-    font-size: var(--font-size-sm);
+    height: 40px;
+    padding: 0 20px;
+    font-size: 0.85rem;
 }
 
 .btn-lg {
-    height: 44px;
-    padding: 0 var(--space-6);
-    font-size: var(--font-size-base);
+    height: 48px;
+    padding: 0 32px;
+    font-size: 0.95rem;
 }
 
 /* === Modifiers === */
 .btn-block {
     width: 100%;
-    display: flex;
 }
 
 .btn:disabled,
 .btn-loading {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
     pointer-events: none;
+    filter: grayscale(0.5);
 }
 
-/* Loading Spinner placeholder */
+/* Loading Spinner */
 .btn-loading {
     position: relative;
     color: transparent !important;
@@ -127,27 +134,18 @@
 .btn-loading::after {
     content: "";
     position: absolute;
-    width: 16px;
-    height: 16px;
+    width: 20px;
+    height: 20px;
     border: 2px solid rgba(255, 255, 255, 0.3);
     border-radius: 50%;
-    border-top-color: currentColor;
-    animation: spin 0.8s linear infinite;
+    border-top-color: #fff;
+    animation: btn-spin 0.8s linear infinite;
     left: 50%;
     top: 50%;
-    margin-left: -8px;
-    margin-top: -8px;
+    margin-left: -10px;
+    margin-top: -10px;
 }
 
-/* If button is secondary/ghost, loading spinner should be dark */
-.btn-secondary.btn-loading::after,
-.btn-ghost.btn-loading::after {
-    border-color: rgba(0, 0, 0, 0.1);
-    border-top-color: var(--text-secondary);
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
+@keyframes btn-spin {
+    to { transform: rotate(360deg); }
 }

@@ -1,89 +1,16 @@
+/* Infinitum Cyber On-Call Theme - Extended for Shift Details */
 .on-call-page {
-    padding: var(--spacing-lg) 0;
+    padding: var(--spacing-xl) 0;
     max-width: 1400px;
     margin: 0 auto;
+    animation: viewportFadeIn 0.8s ease-out;
 }
 
-.current-oncall-card {
-    background: var(--bg-card);
-    border: 1px solid var(--primary-color);
-    border-radius: var(--border-radius-lg);
-    box-shadow: 0 0 20px rgba(0, 229, 255, 0.1);
-}
-
-.avatar-placeholder-large {
-    width: 60px;
-    height: 60px;
-    background: var(--bg-tertiary);
-    border: 2px solid var(--primary-color);
-    color: var(--primary-color);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    font-weight: bold;
-    text-shadow: 0 0 10px var(--primary-color);
-}
-
-.shift-badge {
-    padding: 6px 16px;
-    border-radius: 20px;
-    font-weight: 800;
-    font-size: 12px;
-    letter-spacing: 1px;
-}
-
-.shift-badge.primary {
-    background: rgba(0, 229, 255, 0.2);
-    color: var(--primary-color);
-    border: 1px solid var(--primary-color);
-}
-
-.shift-tag-primary {
-    color: var(--primary-color);
-    background: rgba(0, 229, 255, 0.1);
-    border: 1px solid rgba(0, 229, 255, 0.2);
-}
-
-.shift-tag-secondary {
-    color: #ffab00;
-    background: rgba(255, 171, 0, 0.1);
-    border: 1px solid rgba(255, 171, 0, 0.2);
-}
-
-.row-active {
-    background-color: rgba(0, 229, 255, 0.05);
-}
-
-.border-neon {
-    border: 1px solid var(--primary-color);
-    box-shadow: 0 0 10px rgba(0, 229, 255, 0.1);
-}
-
-.btn-icon.danger {
-    background: none;
-    border: none;
-    color: var(--danger-color);
-    cursor: pointer;
-    font-size: 1.1rem;
-    padding: 4px;
-    transition: transform 0.2s;
-}
-
-.btn-icon.danger:hover {
-    transform: scale(1.2);
-}
-
-.col-span-2 {
-    grid-column: span 2;
-}
-
-/* Escalation Tiers Grid */
+/* --- Escalation Tiers Grid --- */
 .escalation-tiers-grid {
     display: grid;
-    gap: 1.5rem;
-    margin-bottom: 2rem;
+    gap: var(--spacing-xl);
+    margin-bottom: 40px;
 }
 
 @media (min-width: 768px) {
@@ -93,97 +20,172 @@
 }
 
 .tier-card {
-    background: var(--surface-card);
-    border-radius: 12px;
-    padding: 1.25rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    border-top: 4px solid transparent;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 24px;
+    box-shadow: var(--shadow-md);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
 }
 
-.border-primary { border-top-color: var(--primary-color); }
-.border-warning { border-top-color: #f59e0b; }
-.border-purple { border-top-color: #8b5cf6; }
+.tier-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+}
 
-.text-primary { color: var(--primary-color); }
-.text-warning { color: #f59e0b; }
-.text-purple { color: #8b5cf6; }
-
-.bg-primary-100 { background: rgba(59, 130, 246, 0.1); }
-.bg-warning-100 { background: rgba(245, 158, 11, 0.1); }
-.bg-purple-100 { background: rgba(139, 92, 246, 0.1); }
-
-.avatar-placeholder-sm {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
+.tier-card h3 {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 800;
+    margin-bottom: 16px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 1.25rem;
+    gap: 12px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
 }
 
+/* Tier Variants */
+.tier-card.border-primary { border-top: 4px solid var(--accent-cyan); }
+.tier-card.border-primary h3 { color: var(--accent-cyan); text-shadow: 0 0 10px rgba(0, 243, 255, 0.3); }
+
+.tier-card.border-warning { border-top: 4px solid var(--warning-color); }
+.tier-card.border-warning h3 { color: var(--warning-color); text-shadow: 0 0 10px rgba(255, 225, 53, 0.3); }
+
+.tier-card.border-purple { border-top: 4px solid #bc13fe; }
+.tier-card.border-purple h3 { color: #bc13fe; text-shadow: 0 0 10px rgba(188, 19, 254, 0.3); }
+
 .active-oncall-user {
-    padding: 0.5rem;
-    border-radius: 8px;
-    background: var(--surface-ground);
-    transition: transform 0.2s;
+    padding: 12px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .active-oncall-user:hover {
-    transform: translateX(4px);
-}
-
-/* Calendar Overrides */
-.calendar-container {
-    background: var(--surface-card);
-    border: 1px solid var(--border-subtle);
-    border-radius: 12px;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.05);
-}
-
-.rbc-calendar {
-    font-family: inherit;
-    min-height: 600px;
-}
-
-.rbc-toolbar button {
-    color: var(--text-primary);
-    border: 1px solid var(--border-input);
-}
-
-.rbc-toolbar button.rbc-active {
-    background-color: var(--primary-color);
-    color: white;
+    background: rgba(255, 255, 255, 0.05);
     border-color: var(--primary-color);
 }
 
-.rbc-toolbar button:hover {
-    background-color: rgba(59, 130, 246, 0.1);
+/* --- Shift Details Card (Requested Overhaul) --- */
+.active-event-card {
+    background: rgba(10, 10, 15, 0.9);
+    backdrop-filter: blur(30px);
+    border: 1px solid var(--border-color);
+    border-top: 4px solid var(--primary-color);
+    box-shadow: var(--shadow-lg), var(--shadow-glow);
+    animation: modalFadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    padding: 32px !important;
+}
+
+.active-event-card h3 {
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 16px;
+}
+
+.active-event-card .grid-cols-2 {
+    gap: 24px !important;
+}
+
+.active-event-card strong {
+    font-family: var(--font-heading);
+    font-size: 0.65rem;
+    color: var(--text-tertiary) !important;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.active-event-card .text-sm {
+    color: #fff !important;
+    font-size: 0.95rem !important;
+    font-weight: 700;
+}
+
+.active-event-card .mt-6 {
+    margin-top: 32px !important;
+    padding-top: 24px !important;
+    border-top: 1px solid var(--border-color) !important;
+}
+
+.override-form-card {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-lg);
+    animation: slideDown 0.4s ease-out;
+}
+
+/* --- Calendar Overrides --- */
+.calendar-container {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    box-shadow: var(--shadow-lg);
+}
+
+.rbc-calendar {
+    color: #fff;
+}
+
+.rbc-header {
+    background: rgba(255, 255, 255, 0.02) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    font-family: var(--font-heading) !important;
+    font-size: 0.75rem !important;
+    padding: 12px !important;
+    color: var(--text-tertiary) !important;
+}
+
+.rbc-time-content {
+    border-top: 1px solid var(--border-color) !important;
+}
+
+.rbc-timeslot-group {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
 }
 
 .rbc-event {
-    padding: 2px 6px;
+    background: var(--primary-color) !important;
+    border-radius: 2px !important;
+    border: none !important;
+    font-size: 0.8rem !important;
+    padding: 4px 10px !important;
 }
 
-/* Modal form adjustments */
-.override-form-card {
-    border: 1px solid var(--primary-color);
-    box-shadow: 0 0 15px rgba(59, 130, 246, 0.1);
-    animation: slideDown 0.3s ease-out forwards;
+.rbc-today {
+    background: rgba(255, 0, 127, 0.03) !important;
 }
 
-.active-event-card {
-    border-top: 4px solid var(--primary-color);
-    animation: slideUp 0.3s ease-out forwards;
+.rbc-toolbar button {
+    font-family: var(--font-heading) !important;
+    background: transparent !important;
+    border: 1px solid var(--border-color) !important;
+    color: #fff !important;
+}
+
+.rbc-toolbar button.rbc-active {
+    background: var(--primary-color) !important;
+    box-shadow: var(--shadow-glow) !important;
 }
 
 @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slideUp {
-    from { opacity: 0; transform: translateY(10px); }
+    from { opacity: 0; transform: translateY(-20px); }
     to { opacity: 1; transform: translateY(0); }
 }

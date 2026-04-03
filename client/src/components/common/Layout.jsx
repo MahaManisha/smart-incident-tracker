@@ -48,25 +48,33 @@ const Layout = ({ children }) => {
   };
 
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+    <div className="infinitum-layout">
+      {/* Global Cyber Background - Matching Landing Page */}
+      <div className="cyber-overlay">
+          <div className="cyber-grid"></div>
+          <div className="cyber-lines">
+              <div className="line l1"></div>
+              <div className="line l2"></div>
+              <div className="line l3"></div>
+          </div>
+          <div className="cyber-particles">
+              <div className="particle p1"></div>
+              <div className="particle p2"></div>
+              <div className="particle p3"></div>
+              <div className="particle p4"></div>
+          </div>
+          <div className="cyber-scanlines"></div>
+          <div className="cyber-noise"></div>
+      </div>
+
       <Sidebar isOpen={isSidebarOpen} />
 
-      <div style={{
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        minWidth: 0,
-        marginLeft: isSidebarOpen ? 'var(--sidebar-width)' : 'var(--sidebar-width-collapsed)',
-        transition: 'margin-left var(--transition-base)'
+      <div className="main-content-wrapper" style={{
+        marginLeft: isSidebarOpen ? 'var(--sidebar-width)' : 'var(--sidebar-width-collapsed)'
       }}>
         <Navbar onToggleSidebar={toggleSidebar} />
-        <main style={{
-          flex: 1,
-          overflowY: 'auto',
-          backgroundColor: 'var(--bg-secondary)',
-          padding: 'var(--spacing-lg)'
-        }}>
-          <div style={{ maxWidth: 'var(--container-max-width)', margin: '0 auto' }}>
+        <main className="main-viewport">
+          <div className="viewport-container">
             {children}
           </div>
         </main>

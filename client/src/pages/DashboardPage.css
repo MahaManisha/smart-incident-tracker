@@ -1,4 +1,4 @@
-/* ===== Dashboard Page Layout (Ultra-Premium) ===== */
+/* ===== Infinitum Cyber Dashboard - Premium UI Upgrade ===== */
 .dashboard-page {
     display: flex;
     flex-direction: column;
@@ -7,206 +7,180 @@
     margin: 0 auto;
     padding: var(--spacing-xl) var(--spacing-lg);
     width: 100%;
-    animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: viewportFadeIn 1s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 /* ===== Dashboard Header ===== */
 .page-header {
     margin-bottom: var(--spacing-md);
     padding-bottom: var(--spacing-lg);
-    border-bottom: 2px solid rgba(226, 232, 240, 0.4);
-    animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+}
+
+.page-header::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100px;
+    height: 2px;
+    background: var(--primary-color);
+    box-shadow: 0 0 15px var(--primary-color);
 }
 
 .page-title {
-    font-size: 2.75rem;
+    font-family: var(--font-heading);
+    font-size: 2.8rem;
     font-weight: 800;
-    background: linear-gradient(135deg, var(--slate-900) 0%, var(--blue-700) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(255, 0, 127, 0.3);
     margin: 0;
-    letter-spacing: -0.04em;
-    line-height: 1.1;
+    letter-spacing: 2px;
+    text-transform: uppercase;
 }
 
 .page-description {
-    color: var(--slate-500);
-    margin-top: 8px;
-    font-size: 1.1rem;
-    font-weight: 500;
-    letter-spacing: -0.01em;
+    color: var(--text-secondary);
+    margin-top: 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    opacity: 0.8;
 }
 
-/* ===== Professional Dashboard Cards (Launchpad) ===== */
+/* ===== Dashboard Action Cards ===== */
 .dashboard-actions {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: var(--spacing-lg);
+    gap: var(--spacing-xl);
     margin-bottom: var(--spacing-xl);
-    animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
 }
 
 .dashboard-action-card {
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    border-radius: var(--radius-xl);
-    padding: 32px;
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 36px 30px;
     cursor: pointer;
-    transition: all var(--transition-base);
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 20px;
+    gap: 24px;
     position: relative;
     overflow: hidden;
-    height: 100%;
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
 }
 
+/* Corner Accents for Action Cards */
 .dashboard-action-card::after {
     content: '';
     position: absolute;
     top: 0;
     right: 0;
-    width: 150px;
-    height: 150px;
-    background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
-    z-index: 0;
-    pointer-events: none;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(225deg, var(--primary-color) 0%, transparent 50%);
+    opacity: 0;
+    transition: 0.3s;
+}
+
+.dashboard-action-card:hover::after {
+    opacity: 0.4;
 }
 
 .dashboard-action-card:hover {
-    background: white;
-    transform: translateY(-8px);
-    box-shadow: var(--shadow-lg);
-    border-color: var(--blue-200);
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 15px rgba(255, 0, 127, 0.1);
+    border-color: var(--primary-color);
+    background: rgba(255, 0, 127, 0.03);
 }
 
 .action-card-icon {
     width: 64px;
     height: 64px;
-    border-radius: 20px;
+    border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.75rem;
-    background: var(--blue-50);
-    color: var(--blue-600);
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: var(--shadow-sm);
-    z-index: 2;
+    font-size: 1.8rem;
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--primary-color);
+    transition: 0.4s;
+    border: 1px solid var(--border-color);
+    box-shadow: inset 0 0 10px rgba(255, 0, 127, 0.1);
 }
 
 .dashboard-action-card:hover .action-card-icon {
-    transform: scale(1.1) rotate(6deg);
-    background: var(--primary-gradient);
-    color: white;
+    background: var(--primary-color);
+    color: #fff;
     box-shadow: var(--shadow-glow);
+    transform: rotateY(180deg);
 }
 
 .dashboard-action-card h3 {
     font-family: var(--font-heading);
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     font-weight: 800;
-    color: var(--slate-900);
+    color: #fff;
     margin: 0;
-    z-index: 2;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    transition: 0.3s;
+}
+
+.dashboard-action-card:hover h3 {
+    color: var(--primary-color);
+    text-shadow: var(--shadow-glow);
 }
 
 .dashboard-action-card p {
-    color: var(--slate-500);
-    font-size: 1rem;
-    line-height: 1.5;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.6;
     margin: 0;
-    z-index: 2;
+    opacity: 0.8;
 }
 
-/* Primary Launchpad Variation */
-.primary-action {
-    background: rgba(255, 255, 255, 0.8);
-    border-color: rgba(59, 130, 246, 0.2);
-}
-
-.primary-action .action-card-icon {
-    background: var(--primary-gradient);
-    color: white;
-    box-shadow: var(--shadow-glow);
-}
-
-/* ===== Modern Dashboard Grid Section ===== */
+/* ===== Dashboard Sections ===== */
 .dashboard-grid {
     display: grid;
     grid-template-columns: 1fr;
     gap: var(--spacing-xl);
-    animation: slideUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
 }
 
 .dashboard-section {
-    background: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.01);
     backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    border-radius: var(--radius-xl);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
     padding: 40px;
-    box-shadow: var(--shadow-md);
-    transition: all var(--transition-base);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+    transition: 0.4s;
+    position: relative;
+}
+
+.dashboard-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary-color), transparent);
+    opacity: 0.3;
 }
 
 .dashboard-section:hover {
-    background: rgba(255, 255, 255, 0.85);
-    box-shadow: var(--shadow-lg);
+    border-color: rgba(255, 0, 127, 0.1);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
 }
 
-/* ===== Refined Information Banners ===== */
-.error-banner-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 20px 32px;
-    background: rgba(254, 242, 242, 0.8);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(248, 113, 113, 0.3);
-    border-radius: var(--radius-lg);
-    color: #991b1b;
-    margin-bottom: var(--spacing-lg);
-    box-shadow: var(--shadow-sm);
-    animation: fadeIn 0.4s ease;
-}
-
-.error-banner-content {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-}
-
-.error-icon {
-    font-size: 1.75rem;
-    background: #fef2f2;
-    padding: 12px;
-    border-radius: 16px;
-    box-shadow: 0 4px 6px rgba(220, 38, 38, 0.08);
-}
-
-.retry-btn {
-    padding: 10px 24px;
-    background: white;
-    border: 1px solid #fca5a5;
-    color: #991b1b;
-    border-radius: 12px;
-    font-weight: 700;
-    transition: all var(--transition-fast);
-}
-
-.retry-btn:hover {
-    background: #ef4444;
-    color: white;
-    border-color: transparent;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
-}
-
-/* Responsive Adaptive Layout */
+/* ===== Responsive Adaptive Layout ===== */
 @media (max-width: 1280px) {
     .dashboard-actions {
         grid-template-columns: repeat(2, 1fr);
@@ -214,25 +188,8 @@
 }
 
 @media (max-width: 768px) {
-    .dashboard-page {
-        padding: 24px 16px;
-    }
-    
-    .page-title {
-        font-size: 2.25rem;
-    }
-    
-    .dashboard-actions {
-        grid-template-columns: 1fr;
-    }
-    
-    .dashboard-section {
-        padding: 24px;
-    }
-    
-    .error-banner-container {
-        flex-direction: column;
-        gap: var(--spacing-md);
-        text-align: center;
-    }
-}
+    .dashboard-page { padding: 24px 16px; }
+    .page-title { font-size: 2.2rem; }
+    .dashboard-actions { grid-template-columns: 1fr; gap: var(--spacing-md); }
+    .dashboard-section { padding: 24px; }
+}

@@ -150,16 +150,16 @@ const AnalyticsPage = () => {
             {
                 label: 'New Incidents',
                 data: trendCreated,
-                borderColor: '#3b82f6',
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                borderColor: '#00f3ff', // Zenith Cyan
+                backgroundColor: 'rgba(0, 243, 255, 0.1)',
                 fill: true,
                 tension: 0.4
             },
             {
                 label: 'Resolved',
                 data: trendResolved,
-                borderColor: '#22c55e',
-                backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                borderColor: '#ff007f', // Shocking Magenta
+                backgroundColor: 'rgba(255, 0, 127, 0.1)',
                 fill: true,
                 tension: 0.4
             }
@@ -168,11 +168,11 @@ const AnalyticsPage = () => {
 
     // 2. Status Distribution (Doughnut)
     const statusColorMap = {
-        'OPEN': '#3b82f6',
-        'IN_PROGRESS': '#f59e0b',
-        'ASSIGNED': '#8b5cf6',
-        'INVESTIGATING': '#f59e0b',
-        'RESOLVED': '#10b981',
+        'OPEN': '#00f3ff', // Cyan
+        'IN_PROGRESS': '#bc13fe', // Purple
+        'ASSIGNED': '#ff007f', // Magenta
+        'INVESTIGATING': '#bc13fe',
+        'RESOLVED': '#39ff14', // Neon Green
         'CLOSED': '#64748b'
     };
 
@@ -190,10 +190,10 @@ const AnalyticsPage = () => {
 
     // 3. Severity Distribution (Doughnut)
     const severityColorMap = {
-        'CRITICAL': '#ef4444',
-        'HIGH': '#f97316',
-        'MEDIUM': '#eab308',
-        'LOW': '#3b82f6'
+        'CRITICAL': '#ff3e3e', // Red
+        'HIGH': '#ff007f', // Magenta
+        'MEDIUM': '#ffe135', // Yellow
+        'LOW': '#00f3ff' // Cyan
     };
 
     const severityLabels = data.severity.length > 0 ? data.severity.map(s => s.category) : ['No Data'];
@@ -217,7 +217,7 @@ const AnalyticsPage = () => {
             {
                 label: 'Avg Resolution (Hours)',
                 data: data.teams.length > 0 ? data.teams.map(t => t.avgResolutionTimeHours) : [0],
-                backgroundColor: '#6366f1',
+                backgroundColor: '#bc13fe', // Purple
                 borderRadius: 4,
             }
         ]
@@ -230,8 +230,8 @@ const AnalyticsPage = () => {
                 label: 'SLA Compliance (%)',
                 data: data.teams.length > 0 ? data.teams.map(t => t.slaComplianceRate) : [0],
                 backgroundColor: data.teams.length > 0 ? data.teams.map(t =>
-                    t.slaComplianceRate >= 90 ? '#10b981' :
-                        t.slaComplianceRate >= 75 ? '#f59e0b' : '#ef4444'
+                    t.slaComplianceRate >= 90 ? '#39ff14' :
+                        t.slaComplianceRate >= 75 ? '#ffe135' : '#ff3e3e'
                 ) : ['#e2e8f0'],
                 borderRadius: 4,
             }

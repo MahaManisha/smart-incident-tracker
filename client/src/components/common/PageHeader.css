@@ -1,46 +1,52 @@
-/* PageHeader.css */
+/* Infinitum Cyber PageHeader Theme */
 .page-header-wrapper {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: var(--space-6);
-    padding-bottom: var(--space-4);
-    border-bottom: 1px solid var(--border-subtle);
-    min-height: 48px;
-    /* Standardize height */
+    margin-bottom: 32px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+    min-height: 56px;
 }
 
 .page-header-content {
     display: flex;
     flex-direction: column;
-    gap: var(--space-1);
+    gap: 4px;
 }
 
 .page-header-title {
     margin: 0;
-    font-size: var(--font-size-2xl);
-    font-weight: 700;
-    color: var(--text-primary);
-    line-height: 1.2;
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: var(--shadow-glow);
 }
 
 .page-header-description {
     margin: 0;
-    font-size: var(--font-size-base);
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
     color: var(--text-secondary);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .page-header-actions {
     display: flex;
     align-items: center;
-    gap: var(--space-3);
+    gap: 12px;
 }
 
 @media (max-width: 640px) {
     .page-header-wrapper {
         flex-direction: column;
         align-items: flex-start;
-        gap: var(--space-4);
+        gap: 16px;
     }
 
     .page-header-actions {
