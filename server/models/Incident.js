@@ -212,7 +212,20 @@ const incidentSchema = new mongoose.Schema(
           default: Date.now
         }
       }
-    ]
+    ],
+    
+    // Knowledge Base Fields
+    rootCause: {
+      type: String,
+      trim: true,
+      default: null
+    },
+
+    resolutionNotes: {
+      type: String,
+      trim: true,
+      default: null
+    }
   },
   {
     timestamps: true

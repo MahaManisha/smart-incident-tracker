@@ -606,7 +606,7 @@ const assignIncident = async (req, res) => {
 ============================ */
 const updateIncidentStatus = async (req, res) => {
   try {
-    const { status } = req.body;
+    const { status, rootCause, resolutionNotes } = req.body;
 
     const incident = await Incident.findById(req.params.id)
       .populate('reportedBy', 'name email role')
@@ -629,9 +629,11 @@ const updateIncidentStatus = async (req, res) => {
     const oldStatus = incident.status;
     incident.status = status;
 
-    // If resolved, set resolution time
+    // If resolved, set resolution time and KB fields
     if (status === 'RESOLVED') {
       incident.resolvedAt = new Date();
+      incident.rootCause = rootCause || incident.rootCause;
+      incident.resolutionNotes = resolutionNotes || incident.resolutionNotes;
       await notifyIncidentResolved(incident, incident.reportedBy);
 
       // Update Resolution SLA
@@ -837,6 +839,104 @@ const deleteIncident = async (req, res) => {
   }
 };
 
+/* ============================
+   GET INCIDENT INSIGHTS
+   ✅ Multi-dimensional analysis for decision-support
+============================ */
+const getIncidentInsights = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const incident = await Incident.findById(id)
+      .populate('serviceId')
+      .populate('impactedServices');
+
+    if (!incident) {
+      return res.status(404).json({ message: 'Incident not found' });
+    }
+
+    // 1. Likely Root Cause
+    let likelyRootCause = "Unknown - Diagnostic Required";
+    if (incident.serviceId) {
+      likelyRootCause = `${incident.serviceId.name} (Direct Failure)`;
+    } else if (incident.affectedService) {
+      likelyRootCause = `${incident.affectedService} (Reported)`;
+    }
+
+    // 2. Impacted Services
+    const impacted = incident.impactedServices.map(s => s.name);
+
+    // 3. Suggested Actions
+    let suggestedActions = [
+      "Check recent deployment logs for the master branch",
+      "Assign a primary responder via the assignment tool",
+      "Initiate internal communication flow"
+    ];
+
+    if (incident.priority === 'P0' || incident.priority === 'P1') {
+      suggestedActions.unshift("IMMEDIATE: Notify executive bridge and start war room");
+    }
+
+    // 4. Similar Past Incidents (Basic Keywords)
+    const keywords = incident.title.split(' ').filter(w => w.length > 3);
+    const similarIncidents = await Incident.find({
+      _id: { $ne: incident._id },
+      $or: keywords.map(kw => ({ title: { $regex: kw, $options: 'i' } })),
+      status: 'RESOLVED'
+    })
+    .limit(3)
+    .select('title incidentNumber status createdAt');
+
+    res.json({
+      success: true,
+      data: {
+        likelyRootCause,
+        impactedServices: impacted.length > 0 ? impacted : ["Minimal/None detected"],
+        suggestedActions,
+        similarIncidents: similarIncidents.map(inc => ({
+          title: inc.title,
+          id: inc._id,
+          number: inc.incidentNumber || `INC-${inc._id.toString().slice(-8).toUpperCase()}`,
+          date: inc.createdAt
+        }))
+      }
+    });
+
+  } catch (error) {
+    console.error('Fetch insights error:', error);
+    res.status(500).json({ message: 'Failed to fetch insights' });
+  }
+};
+
+/* ============================
+   GET SIMILAR INCIDENTS BY TITLE
+   ✅ Real-time KB suggestions during creation
+============================ */
+const getSimilarIncidentsByTitle = async (req, res) => {
+  try {
+    const { title } = req.query;
+    if (!title || title.length < 4) {
+      return res.json({ success: true, count: 0, incidents: [] });
+    }
+
+    const keywords = title.split(' ').filter(w => w.length > 3);
+    const incidents = await Incident.find({
+      $or: keywords.map(kw => ({ title: { $regex: kw, $options: 'i' } })),
+      status: 'RESOLVED'
+    })
+    .limit(5)
+    .select('title incidentNumber status rootCause resolutionNotes');
+
+    res.json({
+      success: true,
+      count: incidents.length,
+      incidents
+    });
+  } catch (error) {
+    console.error('KB Suggestion Error:', error);
+    res.status(500).json({ message: 'Failed to fetch suggestions' });
+  }
+};
+
 module.exports = {
   createIncident,
   getAllIncidents,
@@ -849,5 +949,7 @@ module.exports = {
   addComment,
   getIncidentHistory,
   updateIncidentPriority,
-  deleteIncident
+  deleteIncident,
+  getIncidentInsights,
+  getSimilarIncidentsByTitle
 };

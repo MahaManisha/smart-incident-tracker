@@ -10,6 +10,7 @@ import AdminOverridePanel from '../components/incidents/AdminOverridePanel';
 import CommentSection from '../components/incidents/CommentSection';
 import IncidentTimeline from '../components/incidents/IncidentTimeline';
 import IncidentDocuments from '../components/incidents/IncidentDocuments';
+import QuickInsightsPanel from '../components/incidents/QuickInsightsPanel';
 import { getIncidentById, updateIncidentPriority, deleteIncident } from '../api/incidentApi';
 import { useAuth } from '../contexts/AuthContext';
 import { USER_ROLES } from '../utils/constants';
@@ -244,6 +245,9 @@ const IncidentDetailPage = () => {
 
           {/* Right Column (30%) - Sticky Sidebar */}
           <div className="incident-sidebar">
+            
+            {/* 1. QUICK INSIGHTS (NEW) */}
+            <QuickInsightsPanel incidentId={incident._id} />
 
             {/* 4. Actions Panel */}
             {showAdminPanel && (

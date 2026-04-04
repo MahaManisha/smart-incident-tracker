@@ -12,7 +12,9 @@ const {
   getMyAssignedIncidents,
   getIncidentHistory,
   updateIncidentPriority,
-  deleteIncident
+  deleteIncident,
+  getIncidentInsights,
+  getSimilarIncidentsByTitle
 } = require('../controllers/incidentController');
 const {
   getIncidentTimeline
@@ -62,6 +64,13 @@ router.get(
   getUnassignedIncidents
 );
 
+// KB SUGGESTIONS (Search by title)
+router.get(
+  '/kb/suggest',
+  verifyToken,
+  getSimilarIncidentsByTitle
+);
+
 // ============================================
 // GET INCIDENT BY ID
 // ============================================
@@ -72,6 +81,19 @@ router.get(
   validate,
   getIncidentById
 );
+
+// ============================================
+// GET INCIDENT INSIGHTS
+// ============================================
+router.get(
+  '/:id/insights',
+  verifyToken,
+  paramValidation.mongoId,
+  validate,
+  getIncidentInsights
+);
+
+
 
 // ============================================
 // ASSIGN INCIDENT - Admin only

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import ReactFlow, {
     Background,
     Controls,
@@ -11,146 +11,210 @@ import 'reactflow/dist/style.css';
 import Layout from '../components/common/Layout';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import DependencyManager from '../components/incidents/DependencyManager';
-import { getGraph, getImpactAnalysis } from '../api/mappingApi';
+import { getGraph, getImpactAnalysis, getServiceStatus } from '../api/mappingApi';
 import { toast } from 'react-toastify';
-import { Link } from 'react-router-dom';
-import { FaServer, FaInfoCircle, FaLink, FaProjectDiagram, FaExclamationTriangle, FaArrowRight } from 'react-icons/fa';
+import { Link, useNavigate } from 'react-router-dom';
+import { 
+    FaServer, FaInfoCircle, FaLink, FaProjectDiagram, FaExclamationTriangle, 
+    FaArrowRight, FaUser, FaClock, FaBug, FaSkullCrossbones, FaBolt, FaPlay, FaLongArrowAltRight
+} from 'react-icons/fa';
 import Button from '../components/common/Button';
 import { useAuth } from '../contexts/AuthContext';
+import { useSocket } from '../contexts/SocketContext';
 import { USER_ROLES } from '../utils/constants';
 import './ServiceMapPage.css';
 
 const ServiceMapPage = () => {
     const { hasRole } = useAuth();
+    const { socket } = useSocket();
+    const navigate = useNavigate();
     const isAdmin = hasRole(USER_ROLES.ADMIN);
+    
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
     const [loading, setLoading] = useState(true);
     const [showManager, setShowManager] = useState(false);
     const [showInfo, setShowInfo] = useState(false);
+    const [demoMode, setDemoMode] = useState(false);
+    
     const [selectedNode, setSelectedNode] = useState(null);
+    const [nodeDetails, setNodeDetails] = useState(null);
     const [impactedServices, setImpactedServices] = useState([]);
-    const [impactLoading, setImpactLoading] = useState(false);
+    const [detailsLoading, setDetailsLoading] = useState(false);
 
-    const fetchGraphData = useCallback(async () => {
+    // Mock Demo Data for Failure Propagation (Steps 1, 2, 6)
+    const getDemoData = useCallback(() => {
+        const demoNodes = [
+            { id: 'db-payment', label: 'Payment DB', type: 'Database (RDS)', status_color: 'red', criticality: 'CRITICAL', is_root_cause: true, is_first_failure: true },
+            { id: 'api-payment', label: 'Payment API', type: 'API Service', status_color: 'red', criticality: 'CRITICAL', is_root_cause: false },
+            { id: 'svc-order', label: 'Order Logic', type: 'Service', status_color: 'yellow', criticality: 'HIGH', is_root_cause: false },
+            { id: 'fe-checkout', label: 'Frontend App', type: 'Checkout UI', status_color: 'yellow', criticality: 'MEDIUM', is_root_cause: false },
+            { id: 'svc-inventory', label: 'Inventory (S3)', type: 'Data Store', status_color: 'green', criticality: 'HIGH', is_root_cause: false }
+        ];
+        const demoEdges = [
+            { id: 'e-db-api', source: 'db-payment', target: 'api-payment', criticality: 'HARD', label: 'reads/writes' },
+            { id: 'e-api-ord', source: 'api-payment', target: 'svc-order', criticality: 'HARD', label: 'validates' },
+            { id: 'e-ord-fe', source: 'svc-order', target: 'fe-checkout', criticality: 'HARD', label: 'serves data' },
+            { id: 'e-inv-ord', source: 'svc-inventory', target: 'svc-order', criticality: 'SOFT', label: 'syncs' }
+        ];
+        return { nodes: demoNodes, edges: demoEdges };
+    }, []);
+
+    const fetchGraphData = useCallback(async (isSilent = false) => {
         try {
-            setLoading(true);
-            const response = await getGraph();
-            const { nodes: backendNodes, edges: backendEdges } = response;
+            if (!isSilent) setLoading(true);
+            
+            let backendNodes, backendEdges;
+            if (demoMode) {
+                const demo = getDemoData();
+                backendNodes = demo.nodes;
+                backendEdges = demo.edges;
+            } else {
+                const response = await getGraph();
+                backendNodes = response.nodes;
+                backendEdges = response.edges;
+            }
 
-            // Transform backend nodes to React Flow nodes
+            // Step 3 & 5: Visible Propagation Logic
             const transformedNodes = backendNodes.map((node, index) => {
-                // simple grid layout
-                const x = (index % 4) * 280;
-                const y = Math.floor(index / 4) * 220;
-
+                const x = (index % 4) * 320; // Increased spacing for labels
+                const y = Math.floor(index / 4) * 250;
                 const statusColor = node.status_color || 'green';
+                const isFailed = statusColor === 'red' || statusColor === 'yellow';
 
                 return {
                     id: node.id,
                     data: {
                         label: (
-                            <div className="custom-node-content">
-                                <div className="node-icon-wrapper">
-                                    <FaServer />
-                                </div>
-                                <div className="node-text-wrapper">
-                                    <strong className="node-label">{node.label}</strong>
-                                    <div className="node-metadata">
-                                        <span className={`status-dot ${statusColor}`}></span>
-                                        <span className="status-text">{statusColor.toUpperCase()}</span>
+                            <div className={`node-v3 ${statusColor} ${node.is_root_cause ? 'node-root' : ''}`}>
+                                {node.is_root_cause && (
+                                    <div className="node-crown"><FaSkullCrossbones /> ROOT CAUSE</div>
+                                )}
+                                {node.is_first_failure && (
+                                    <div className="node-spark"><FaBolt /> FIRST FAIL</div>
+                                )}
+                                <div className="node-body">
+                                    <div className="node-main-icon"><FaServer /></div>
+                                    <div className="node-details">
+                                        <div className="node-title">{node.label}</div>
+                                        <div className="node-sub">{node.type}</div>
                                     </div>
-                                    <div className="node-criticality-badge">{node.criticality}</div>
+                                </div>
+                                <div className={`node-status-bar bar-${statusColor}`}>
+                                    {statusColor.toUpperCase()}
                                 </div>
                             </div>
                         )
                     },
                     position: { x, y },
-                    className: `node-${statusColor}`,
+                    className: `flow-node-v3`,
                     style: {
-                        borderRadius: '12px',
-                        padding: '12px',
-                        width: 200,
-                        fontSize: '12px',
-                        color: 'var(--text-primary)',
-                        transition: 'all 0.5s ease'
+                        width: 240,
+                        height: 110,
+                        zIndex: node.is_root_cause ? 100 : 1,
+                        transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
                     }
                 };
             });
 
-            // Transform backend edges to React Flow edges
-            const transformedEdges = backendEdges.map(edge => ({
-                id: edge.id,
-                source: edge.source,
-                target: edge.target,
-                label: edge.criticality === 'SOFT' ? 'SOFT' : '',
-                animated: ['red', 'yellow'].includes(
-                    backendNodes.find(n => n.id === edge.source)?.status_color
-                ),
-                style: {
-                    stroke: edge.criticality === 'HARD' ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.15)',
-                    strokeWidth: edge.criticality === 'HARD' ? 2 : 1
-                },
-                markerEnd: {
-                    type: MarkerType.ArrowClosed,
-                    color: edge.criticality === 'HARD' ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.15)',
-                },
-            }));
+            // Step 5 & 6: Clean Arrows and Edge Labels
+            const transformedEdges = backendEdges.map(edge => {
+                const sourceNode = backendNodes.find(n => n.id === edge.source);
+                const isFailurePath = sourceNode && ['red', 'yellow'].includes(sourceNode.status_color);
+
+                return {
+                    id: edge.id,
+                    source: edge.source,
+                    target: edge.target,
+                    label: edge.label || '', // Step 6
+                    labelStyle: { fill: '#ffffff66', fontSize: 10, fontWeight: 700, fontFamily: 'Orbitron' },
+                    labelBgStyle: { fill: '#050508', fillOpacity: 0.8 },
+                    type: 'smoothstep', // Step 5
+                    animated: isFailurePath, // Step 3
+                    style: {
+                        stroke: isFailurePath ? '#ff3e3e' : 'rgba(255, 255, 255, 0.15)',
+                        strokeWidth: isFailurePath ? 4 : 2, // Step 3: Thick lines
+                        filter: isFailurePath ? 'drop-shadow(0 0 8px rgba(255, 62, 62, 0.8))' : 'none'
+                    },
+                    markerEnd: {
+                        type: MarkerType.ArrowClosed,
+                        width: 24,
+                        height: 24,
+                        color: isFailurePath ? '#ff3e3e' : 'rgba(255, 255, 255, 0.15)',
+                    },
+                };
+            });
 
             setNodes(transformedNodes);
             setEdges(transformedEdges);
         } catch (error) {
-            console.error('Fetch Graph Error:', error);
-            toast.error('Failed to load dependency graph');
+            console.error('Graph Error:', error);
+            if (!isSilent) toast.error('Failed to resolve topology');
         } finally {
-            setLoading(false);
+            if (!isSilent) setLoading(false);
         }
-    }, [setNodes, setEdges]);
+    }, [setNodes, setEdges, demoMode, getDemoData]);
     
+    useEffect(() => {
+        if (demoMode) return;
+        const interval = setInterval(() => fetchGraphData(true), 15000);
+        return () => clearInterval(interval);
+    }, [fetchGraphData, demoMode]);
+
+    useEffect(() => {
+        if (socket && !demoMode) {
+            socket.on('GRAPH_UPDATED', () => fetchGraphData(true));
+            return () => socket.off('GRAPH_UPDATED');
+        }
+    }, [socket, fetchGraphData, demoMode]);
+
+    // Step 4: Click = Blast Radius Analysis
     const onNodeClick = async (_, node) => {
         setSelectedNode(node);
-        setImpactLoading(true);
+        setDetailsLoading(true);
         try {
-            const data = await getImpactAnalysis(node.id);
-            setImpactedServices(data);
+            const [impactData, statusData] = await Promise.all([
+                getImpactAnalysis(node.id),
+                getServiceStatus(node.id)
+            ]);
             
-            // Highlight impacted nodes
-            const impactedIds = data.map(s => s._id);
+            setImpactedServices(impactData);
+            setNodeDetails(statusData);
+            
+            const impactedIds = impactData.map(s => s._id);
             setNodes((nds) =>
                 nds.map((n) => ({
                     ...n,
                     style: {
                         ...n.style,
-                        border: impactedIds.includes(n.id) ? '4px solid #ef4444' : 'none',
-                        boxShadow: impactedIds.includes(n.id) ? '0 0 20px #ef4444' : 'none',
-                        opacity: (n.id === node.id || impactedIds.includes(n.id)) ? 1 : 0.4
+                        border: impactedIds.includes(n.id) ? '4px solid #ff3e3e' : '1px solid rgba(255,255,255,0.1)',
+                        boxShadow: impactedIds.includes(n.id) ? '0 0 25px rgba(255, 62, 62, 0.6)' : 'none',
+                        opacity: (n.id === node.id || impactedIds.includes(n.id)) ? 1 : 0.15, // Bright target, dim others
+                        transform: (n.id === node.id || impactedIds.includes(n.id)) ? 'scale(1.1)' : 'scale(1)'
                     }
                 }))
             );
 
-            // Highlight edges leading to impacted nodes
             setEdges((eds) =>
                 eds.map((e) => ({
                     ...e,
                     animated: impactedIds.includes(e.target),
                     style: {
                         ...e.style,
-                        stroke: impactedIds.includes(e.target) ? '#ef4444' : e.style.stroke,
-                        opacity: impactedIds.includes(e.target) ? 1 : 0.2
+                        stroke: impactedIds.includes(e.target) ? '#ff3e3e' : 'rgba(255,255,255,0.05)',
+                        strokeWidth: impactedIds.includes(e.target) ? 6 : 1,
+                        opacity: impactedIds.includes(e.target) ? 1 : 0.05
                     }
                 }))
             );
-        } catch (error) {
-            console.error('Impact Error:', error);
-        } finally {
-            setImpactLoading(false);
-        }
+        } catch (error) { console.error(error); } finally { setDetailsLoading(false); }
     };
 
     const clearSelection = () => {
         setSelectedNode(null);
+        setNodeDetails(null);
         setImpactedServices([]);
-        fetchGraphData(); // Reset graph styles
+        fetchGraphData(true);
     };
 
     useEffect(() => {
@@ -160,190 +224,138 @@ const ServiceMapPage = () => {
     return (
         <Layout>
             <div className="service-map-page">
-                <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', width: '100%', marginBottom: '32px' }}>
-                    <div>
-                        <h1 className="page-title">Infrastructure Dependency Map</h1>
-                        <p className="page-description" style={{ color: 'var(--slate-500)', marginTop: '4px' }}>Visualize real-time service health and failure propagation</p>
-                    </div>
-                    <div className="map-actions" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                        <Button 
-                            className="map-action-btn-premium map-btn-info"
-                            onClick={() => setShowInfo(!showInfo)}
-                            title="How it works"
-                            icon={<FaInfoCircle />}
-                        >
-                            INFO
-                        </Button>
-                        {isAdmin && (
-                            <Button 
-                                className={`map-action-btn-premium map-btn-manage ${showManager ? 'active' : ''}`}
-                                onClick={() => setShowManager(!showManager)}
-                                icon={<FaServer />}
-                            >
-                                {showManager ? 'HIDE MANAGER' : 'MANAGE RELATIONSHIPS'}
-                            </Button>
-                        )}
-                        <Button 
-                            className="map-action-btn-premium map-btn-refresh"
-                            onClick={fetchGraphData}
-                        >
-                            REFRESH LIVE STATUS
-                        </Button>
-                    </div>
-                </div>
-
-                {showInfo && (
-                    <div className="info-alert-panel">
-                        <div className="info-content">
-                            <div className="info-header">
-                                <FaProjectDiagram className="text-primary-color" />
-                                <h3>Understanding the Dependency Map</h3>
-                            </div>
-                            <div className="info-body">
-                                <div className="info-step">
-                                    <span className="step-num">1</span>
-                                    <p><strong>Register Services:</strong> Go to the <strong>Inventory</strong> page to add your infrastructure components (APIs, DBs, etc).</p>
-                                </div>
-                                <div className="info-step">
-                                    <span className="step-num">2</span>
-                                    <p><strong>Map Relationships:</strong> Use the <strong>Manage Relationships</strong> tool above to define how services depend on each other.</p>
-                                </div>
-                                <div className="info-step">
-                                    <span className="step-num">3</span>
-                                    <p><strong>Monitor Health:</strong> The map automatically turns 🔴 or 🟡 when incidents are reported for a service, helping you visualize the blast radius of a failure.</p>
-                                </div>
-                            </div>
-                            <button className="info-close" onClick={() => setShowInfo(false)}>&times;</button>
+                <div className="map-toolbar">
+                    <div className="toolbar-left">
+                        <h1 className="cyber-title">TOPOLOGY INTELLIGENCE ENGINE</h1>
+                        <div className="live-status-chip">
+                            <span className="pulse-dot"></span> REAL-TIME MONITORING ACTIVE
                         </div>
                     </div>
-                )}
-
-                {showManager && (
-                    <div className="manager-overlay-container">
-                        <DependencyManager onUpdate={fetchGraphData} />
-                    </div>
-                )}
-
-                <div className="map-container-wrapper mt-10">
-                    <div className="section-header">
-                        <h4 className="mapped-title">Architectural Topology</h4>
-                    </div>
-
-                    <div className="map-container rounded-xl overflow-hidden shadow-2xl">
-                        {loading ? (
-                            <div className="flex h-full items-center justify-center bg-gray-900">
-                                <LoadingSpinner />
-                            </div>
-                        ) : nodes.length === 0 ? (
-                            <div className="flex h-full items-center justify-center bg-gray-900 text-secondary-color flex-col gap-6 text-center p-10">
-                                <div className="empty-map-icon-wrapper">
-                                    <FaServer size={60} className="text-blue-500 opacity-50" />
-                                    <FaLink size={30} className="link-icon-absolute" />
-                                </div>
-                                <div>
-                                    <h3 className="text-xl font-bold text-white mb-2">No Infrastructure Mapped</h3>
-                                    <p className="text-gray-400 max-w-md">Your dependency map is currently empty. Start by registering your services and then define their connections.</p>
-                                </div>
-                                <div className="flex gap-4" style={{ display: 'flex', gap: '16px', marginTop: '20px' }}>
-                                    <Link to="/services" className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                                        <FaServer /> GO TO INVENTORY
-                                    </Link>
-                                    {isAdmin && (
-                                        <Button variant="secondary" onClick={() => setShowManager(true)}>
-                                            ADD RELATIONSHIPS
-                                        </Button>
-                                    )}
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="flex w-full h-full relative">
-                                <ReactFlow
-                                    nodes={nodes}
-                                    edges={edges}
-                                    onNodesChange={onNodesChange}
-                                    onEdgesChange={onEdgesChange}
-                                    onNodeClick={onNodeClick}
-                                    onPaneClick={clearSelection}
-                                    fitView
-                                    className="dark-flow"
-                                >
-                                    <Background color="rgba(255,255,255,0.05)" gap={25} />
-                                    <Controls />
-                                    <MiniMap
-                                        nodeStrokeColor={(n) => {
-                                            if (n.className === 'node-red') return '#ef4444';
-                                            if (n.className === 'node-yellow') return '#f59e0b';
-                                            return '#10b981';
-                                        }}
-                                        nodeColor="rgba(0,0,0,0.5)"
-                                        style={{ background: '#000', border: '1px solid #333' }}
-                                        maskColor="rgba(0,0,0,0.2)"
-                                    />
-                                </ReactFlow>
-
-                                {selectedNode && (
-                                    <div className="impact-analysis-panel">
-                                        <div className="panel-header">
-                                            <h4 className="flex items-center gap-2">
-                                                <FaExclamationTriangle className="text-amber-500" />
-                                                Impact Analysis
-                                            </h4>
-                                            <button className="panel-close" onClick={clearSelection}>&times;</button>
-                                        </div>
-                                        <div className="panel-body">
-                                            <div className="source-info">
-                                                <label>Analyzing Failure impact for:</label>
-                                                <div className="source-node-pill">
-                                                    <FaServer /> {selectedNode.data.label.props.children[1].props.children[0].props.children}
-                                                </div>
-                                            </div>
-
-                                            {impactLoading ? (
-                                                <div className="p-4 text-center"><LoadingSpinner /></div>
-                                            ) : (
-                                                <div className="impact-results">
-                                                    <label>Downstream Impacted Services ({impactedServices.length})</label>
-                                                    {impactedServices.length === 0 ? (
-                                                        <p className="no-impact-text">No downstream dependencies will be affected by a failure of this service.</p>
-                                                    ) : (
-                                                        <ul className="impact-list">
-                                                            {impactedServices.map(s => (
-                                                                <li key={s._id} className="impact-item">
-                                                                    <FaArrowRight className="text-gray-600" />
-                                                                    <span>{s.name}</span>
-                                                                    <span className={`mini-badge ${s.criticality.toLowerCase()}`}>{s.criticality}</span>
-                                                                </li>
-                                                            ))}
-                                                        </ul>
-                                                    )}
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="panel-footer">
-                                            <p className="text-[10px] text-gray-500 italic">This analysis follows all recursive "Depends On" relationships in your infrastructure.</p>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
+                    <div className="toolbar-right">
+                        <Button 
+                            className={`demo-btn ${demoMode ? 'active' : ''}`}
+                            onClick={() => setDemoMode(!demoMode)}
+                            icon={<FaPlay />}
+                        >
+                            {demoMode ? 'LIVE PRODUCTION' : 'SIMULATE PROPAGATION'}
+                        </Button>
+                        <Button variant="secondary" onClick={() => setShowInfo(!showInfo)} icon={<FaInfoCircle />}>HOW-TO</Button>
+                        {isAdmin && (
+                            <Button 
+                                variant={showManager ? "primary" : "secondary"}
+                                onClick={() => setShowManager(!showManager)}
+                                icon={<FaLink />}
+                            >
+                                RELATIONS
+                            </Button>
                         )}
                     </div>
                 </div>
 
-                <div className="map-legend">
-                    <div className="legend-item">
-                        <div className="dot operational"></div>
-                        <span>Healthy (No active incidents)</span>
+                {showManager && (
+                    <div className="topology-manager-overlay">
+                        <DependencyManager onUpdate={() => fetchGraphData(true)} />
                     </div>
-                    <div className="legend-item">
-                        <div className="dot degraded"></div>
-                        <span>Degraded (P2/P3 Incidents)</span>
+                )}
+
+                <div className="map-viewport">
+                    {loading ? (
+                        <div className="loading-overlay"><LoadingSpinner text="Tracing Dependencies..." /></div>
+                    ) : (
+                        <div className="w-full h-full relative">
+                            <ReactFlow
+                                nodes={nodes}
+                                edges={edges}
+                                onNodesChange={onNodesChange}
+                                onEdgesChange={onEdgesChange}
+                                onNodeClick={onNodeClick}
+                                onPaneClick={clearSelection}
+                                fitView
+                                className="cyber-flow"
+                            >
+                                <Background color="#0a0a0f" gap={50} />
+                                <Controls />
+                            </ReactFlow>
+
+                            {selectedNode && (
+                                <div className="intelligence-panel slide-in">
+                                    <div className="panel-header">
+                                        <div className="flex items-center gap-3">
+                                            <FaProjectDiagram className="text-primary-color" />
+                                            <h3>{nodeDetails?.service.name || 'ANALYTICS'}</h3>
+                                        </div>
+                                        <button className="close-btn" onClick={clearSelection}>&times;</button>
+                                    </div>
+
+                                    <div className="panel-body">
+                                        {detailsLoading ? (
+                                            <LoadingSpinner size="sm" />
+                                        ) : nodeDetails && (
+                                            <>
+                                                <div className="quick-stats">
+                                                    <div className="stat-card">
+                                                        <span className="sc-label uppercase">Health</span>
+                                                        <span className={`sc-val status-${nodeDetails.service.status.toLowerCase()}`}>
+                                                            {nodeDetails.service.status}
+                                                        </span>
+                                                    </div>
+                                                    <div className="stat-card">
+                                                        <span className="sc-label uppercase">Impact</span>
+                                                        <span className="sc-val text-white">{impactedServices.length} Nodes</span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="intel-group">
+                                                    <label className="intel-label"><FaBug /> ACTIVE INVESTIGATIONS</label>
+                                                    {nodeDetails.activeIncidents.length === 0 ? (
+                                                        <div className="empty-intel">No reported incidents.</div>
+                                                    ) : nodeDetails.activeIncidents.map(inc => (
+                                                        <div key={inc.id} className="mini-inc-card">
+                                                            <div className="mini-hdr">
+                                                                <span className="num">{inc.incidentNumber}</span>
+                                                                <span className={`prio pri-${inc.priority.toLowerCase()}`}>{inc.priority}</span>
+                                                            </div>
+                                                            <div className="mini-ttl">{inc.title}</div>
+                                                            <div className="mini-ftr">
+                                                                <span><FaUser /> {inc.assignedTo}</span>
+                                                                <span className="timer"><FaClock /> {new Date(inc.slaDeadline).toLocaleTimeString()}</span>
+                                                            </div>
+                                                            <div className="mini-actions mt-3">
+                                                                <Link to={`/incidents/${inc.id}`} className="mini-btn">VIEW ANALYSIS</Link>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+
+                                                <div className="intel-group mt-6">
+                                                    <label className="intel-label"><FaExclamationTriangle /> BLAST RADIUS (DOWNSTREAM)</label>
+                                                    <div className="blast-container">
+                                                        {impactedServices.map(s => (
+                                                            <div key={s._id} className="blast-item">
+                                                                <FaLongArrowAltRight /> {s.name}
+                                                            </div>
+                                                        ))}
+                                                        {impactedServices.length === 0 && <div className="empty-intel">No downstream propagation.</div>}
+                                                    </div>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                <div className="map-footer-labels">
+                    <div className="label-set"><span className="dot ok"></span> Healthy</div>
+                    <div className="label-set"><span className="dot warn"></span> Degraded</div>
+                    <div className="label-set"><span className="dot fail"></span> Outage</div>
+                    <div className="label-set ml-6 pl-4 border-l border-white/20">
+                        <span className="text-danger-color font-bold">☠ ROOT CAUSE:</span> Start of failure chain
                     </div>
-                    <div className="legend-item">
-                        <div className="dot outage"></div>
-                        <span>Critical (P0/P1 Incidents)</span>
-                    </div>
-                    <div className="legend-item border-l border-gray-700 pl-6 ml-4 italic text-xs text-secondary-color">
-                        Downstream arrows indicate service dependencies
+                    <div className="label-set ml-6 pl-4 border-l border-white/20">
+                        <span className="text-white opacity-40 italic">Double-click edge to edit link</span>
                     </div>
                 </div>
             </div>

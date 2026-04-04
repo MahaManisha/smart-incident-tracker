@@ -16,7 +16,8 @@ router.get('/dependencies', verifyToken, dependencyController.getAllDependencies
 router.post('/dependencies', verifyToken, isResponderOrAdmin, dependencyController.createDependency);
 router.delete('/dependencies/:id', verifyToken, isResponderOrAdmin, dependencyController.deleteDependency);
 
-// Impact Analysis
+// Impact & Status Analysis
 router.get('/services/:serviceId/impact', verifyToken, dependencyController.getImpactAnalysis);
+router.get('/services/:serviceId/status', verifyToken, dependencyController.getServiceStatusDetails);
 
 module.exports = router;

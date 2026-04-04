@@ -29,6 +29,19 @@ const createNotification = async (userId, type, incidentId, title, message, prio
   }
 };
 
+// Broadcast to all clients specifically for live-map updates
+const broadcastGraphUpdate = () => {
+  try {
+    const socketUtil = require('../socket');
+    const io = socketUtil.getIO();
+    if (io) {
+      io.emit('GRAPH_UPDATED', { timestamp: new Date() });
+    }
+  } catch (err) {
+    // Silently ignore if socket not ready
+  }
+};
+
 // Notify when incident is created
 const notifyIncidentCreated = async (incident) => {
   try {
@@ -50,6 +63,7 @@ const notifyIncidentCreated = async (incident) => {
     });
 
     await Promise.all(notifications);
+    broadcastGraphUpdate();
   } catch (error) {
     console.error('Error notifying incident created:', error);
   }
@@ -119,6 +133,7 @@ const notifyIncidentResolved = async (incident, reporter) => {
       'incidentResolved',
       { incident, reporter }
     );
+    broadcastGraphUpdate();
   } catch (error) {
     console.error('Error notifying incident resolved:', error);
   }
@@ -160,6 +175,7 @@ const notifyStatusUpdate = async (incident, oldStatus, newStatus) => {
     });
 
     await Promise.all(notifications);
+    broadcastGraphUpdate();
   } catch (error) {
     console.error('Error notifying status update:', error);
   }

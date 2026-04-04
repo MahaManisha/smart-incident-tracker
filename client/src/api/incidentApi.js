@@ -40,10 +40,12 @@ export const assignIncident = async (id, responderId) => {
 };
 
 // ✅ FIX: Changed from PATCH to PUT to match backend route
-export const updateIncidentStatus = async (id, status, notes) => {
+export const updateIncidentStatus = async (id, status, notes, rootCause, resolutionNotes) => {
   const response = await axiosInstance.put(`/incidents/${id}/status`, {
     status,
     notes,
+    rootCause,
+    resolutionNotes
   });
   return response;
 };
@@ -126,6 +128,18 @@ export const getIncidentDocumentation = async (incidentId) => {
 export const getResolvedIncidentsWithDocumentation = async (params = {}) => {
   const queryString = new URLSearchParams(params).toString();
   const response = await axiosInstance.get(`/incidents/resolved/documentation?${queryString}`);
+  return response;
+};
+
+// Get incident insights for decision support
+export const getIncidentInsights = async (id) => {
+  const response = await axiosInstance.get(`/incidents/${id}/insights`);
+  return response;
+};
+
+// KB Suggestions based on title
+export const getKBSuggestions = async (title) => {
+  const response = await axiosInstance.get(`/incidents/kb/suggest?title=${encodeURIComponent(title)}`);
   return response;
 };
 

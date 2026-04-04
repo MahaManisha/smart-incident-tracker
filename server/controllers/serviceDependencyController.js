@@ -64,17 +64,27 @@ exports.getGraph = async (req, res) => {
             );
 
             let status_color = 'green';
-            if (serviceIncidents.some(inc => ['P0', 'P1'].includes(inc.priority))) {
-                status_color = 'red';
-            } else if (serviceIncidents.some(inc => ['P2', 'P3'].includes(inc.priority))) {
-                status_color = 'yellow';
+            let earliestIncident = null;
+
+            if (serviceIncidents.length > 0) {
+                if (serviceIncidents.some(inc => ['P0', 'P1'].includes(inc.priority))) {
+                    status_color = 'red';
+                } else if (serviceIncidents.some(inc => ['P2', 'P3'].includes(inc.priority))) {
+                    status_color = 'yellow';
+                }
+                // Find earliest reported incident
+                earliestIncident = serviceIncidents.reduce((prev, curr) => 
+                    (!prev || new Date(curr.reportedAt) < new Date(prev.reportedAt)) ? curr : prev
+                , null);
             }
 
             return {
                 id: s._id,
                 label: s.name,
+                type: s.type || 'Service', // Include type
                 status_color,
-                criticality: s.criticality
+                criticality: s.criticality,
+                earliest_report: earliestIncident ? earliestIncident.reportedAt : null
             };
         });
 
@@ -85,10 +95,70 @@ exports.getGraph = async (req, res) => {
             criticality: d.dependencyType
         }));
 
+        // Calculate Root Cause and First Failure
+        const downNodes = nodes.filter(n => n.status_color !== 'green');
+        
+        let globalFirstFailureNodeId = null;
+        if (downNodes.length > 0) {
+            const sortedByTime = [...downNodes].filter(n => n.earliest_report).sort((a,b) => 
+                new Date(a.earliest_report) - new Date(b.earliest_report)
+            );
+            if (sortedByTime.length > 0) globalFirstFailureNodeId = sortedByTime[0].id.toString();
+        }
+
+        nodes.forEach(n => {
+            n.is_first_failure = globalFirstFailureNodeId === n.id.toString();
+
+            if (n.status_color !== 'green') {
+                const upstreams = dependencies.filter(d => d.dependentService.toString() === n.id.toString());
+                const upstreamDown = upstreams.some(u => 
+                    downNodes.some(dn => dn.id.toString() === u.sourceService.toString())
+                );
+                n.is_root_cause = !upstreamDown;
+            } else {
+                n.is_root_cause = false;
+            }
+        });
+
         res.json({ nodes, edges });
     } catch (error) {
         console.error('Graph Error:', error);
         res.status(500).json({ message: 'Error fetching dependency graph' });
+    }
+};
+
+exports.getServiceStatusDetails = async (req, res) => {
+    try {
+        const { serviceId } = req.params;
+
+        const [service, activeIncidents] = await Promise.all([
+            Service.findById(serviceId).populate('ownerTeam', 'name'),
+            Incident.find({
+                serviceId,
+                status: { $in: ['OPEN', 'ASSIGNED', 'INVESTIGATING'] }
+            }).populate('assignedTo', 'name email role')
+              .populate('escalationPolicy', 'name')
+        ]);
+
+        if (!service) return res.status(404).json({ message: 'Service not found' });
+
+        res.json({
+            service,
+            activeIncidents: activeIncidents.map(inc => ({
+                id: inc._id,
+                incidentNumber: inc.incidentNumber,
+                title: inc.title,
+                priority: inc.priority,
+                status: inc.status,
+                assignedTo: inc.assignedTo ? inc.assignedTo.name : 'Unassigned',
+                slaDeadline: inc.slaResolutionDeadline,
+                escalationPolicyName: inc.escalationPolicy ? inc.escalationPolicy.name : 'None',
+                reportedAt: inc.reportedAt
+            }))
+        });
+    } catch (error) {
+        console.error('Service status error:', error);
+        res.status(500).json({ message: 'Error fetching service status details' });
     }
 };
 

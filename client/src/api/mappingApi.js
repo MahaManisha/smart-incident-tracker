@@ -35,3 +35,7 @@ export const deleteDependency = async (id) => {
 export const getImpactAnalysis = async (serviceId) => {
     return await axiosInstance.get(`/mapping/services/${serviceId}/impact`);
 };
+
+export const getServiceStatus = async (serviceId) => {
+    return await axiosInstance.get(`/mapping/services/${serviceId}/status`);
+};
