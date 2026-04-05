@@ -24,6 +24,10 @@ export const getGraph = async () => {
     return await axiosInstance.get('/mapping/graph');
 };
 
+export const getTopologyForIncident = async (incidentId, simulate = false) => {
+    return await axiosInstance.get(`/mapping/topology/${incidentId}?simulate=${simulate}`);
+};
+
 export const createDependency = async (dependencyData) => {
     return await axiosInstance.post('/mapping/dependencies', dependencyData);
 };

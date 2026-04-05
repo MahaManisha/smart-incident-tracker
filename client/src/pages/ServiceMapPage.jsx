@@ -11,13 +11,16 @@ import 'reactflow/dist/style.css';
 import Layout from '../components/common/Layout';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import DependencyManager from '../components/incidents/DependencyManager';
-import { getGraph, getImpactAnalysis, getServiceStatus } from '../api/mappingApi';
+import { getGraph, getImpactAnalysis, getServiceStatus, getTopologyForIncident } from '../api/mappingApi';
+import { getAllIncidents } from '../api/incidentApi';
 import { toast } from 'react-toastify';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
     FaServer, FaInfoCircle, FaLink, FaProjectDiagram, FaExclamationTriangle, 
-    FaArrowRight, FaUser, FaClock, FaBug, FaSkullCrossbones, FaBolt, FaPlay, FaLongArrowAltRight
+    FaArrowRight, FaUser, FaClock, FaBug, FaSkullCrossbones, FaBolt, FaPlay, FaLongArrowAltRight,
+    FaHistory, FaStop
 } from 'react-icons/fa';
+import { getIncidentTimeline } from '../api/incidentApi';
 import Button from '../components/common/Button';
 import { useAuth } from '../contexts/AuthContext';
 import { useSocket } from '../contexts/SocketContext';
@@ -42,34 +45,83 @@ const ServiceMapPage = () => {
     const [impactedServices, setImpactedServices] = useState([]);
     const [detailsLoading, setDetailsLoading] = useState(false);
 
-    // Mock Demo Data for Failure Propagation (Steps 1, 2, 6)
-    const getDemoData = useCallback(() => {
-        const demoNodes = [
-            { id: 'db-payment', label: 'Payment DB', type: 'Database (RDS)', status_color: 'red', criticality: 'CRITICAL', is_root_cause: true, is_first_failure: true },
-            { id: 'api-payment', label: 'Payment API', type: 'API Service', status_color: 'red', criticality: 'CRITICAL', is_root_cause: false },
-            { id: 'svc-order', label: 'Order Logic', type: 'Service', status_color: 'yellow', criticality: 'HIGH', is_root_cause: false },
-            { id: 'fe-checkout', label: 'Frontend App', type: 'Checkout UI', status_color: 'yellow', criticality: 'MEDIUM', is_root_cause: false },
-            { id: 'svc-inventory', label: 'Inventory (S3)', type: 'Data Store', status_color: 'green', criticality: 'HIGH', is_root_cause: false }
-        ];
-        const demoEdges = [
-            { id: 'e-db-api', source: 'db-payment', target: 'api-payment', criticality: 'HARD', label: 'reads/writes' },
-            { id: 'e-api-ord', source: 'api-payment', target: 'svc-order', criticality: 'HARD', label: 'validates' },
-            { id: 'e-ord-fe', source: 'svc-order', target: 'fe-checkout', criticality: 'HARD', label: 'serves data' },
-            { id: 'e-inv-ord', source: 'svc-inventory', target: 'svc-order', criticality: 'SOFT', label: 'syncs' }
-        ];
-        return { nodes: demoNodes, edges: demoEdges };
+    const [incidents, setIncidents] = useState([]);
+    const [selectedIncident, setSelectedIncident] = useState(''); // Stores Incident ID
+    const [error, setError] = useState(null);
+
+    // Replay State
+    const [isReplaying, setIsReplaying] = useState(false);
+    const [replayBatch, setReplayBatch] = useState([]);
+    const [replayCursor, setReplayCursor] = useState(0);
+
+    const runReplay = async () => {
+        if (!selectedIncident) return;
+        try {
+            setIsReplaying(true);
+            setLoading(true);
+            const timeline = await getIncidentTimeline(selectedIncident);
+            const events = timeline.data || timeline;
+            setReplayBatch(events);
+            setReplayCursor(0);
+            
+            // Replay sequence
+            for (let i = 0; i < events.length; i++) {
+                setReplayCursor(i);
+                // Highlight nodes based on event type
+                const event = events[i];
+                if (event.type === 'STATUS_UPDATED') {
+                    toast.info(`Time: ${new Date(event.timestamp).toLocaleTimeString()} - Status: ${event.data.newStatus}`, { autoClose: 1000 });
+                }
+                await new Promise(r => setTimeout(r, 2000)); // 2s per event
+            }
+            toast.success("Incident Replay Completed");
+        } catch (err) {
+            toast.error("Replay failed");
+        } finally {
+            setIsReplaying(false);
+            setLoading(false);
+        }
+    };
+
+    const fetchIncidents = useCallback(async () => {
+        try {
+            const response = await getAllIncidents({ status: 'OPEN,ASSIGNED,INVESTIGATING' });
+            // The response might be { incidents: [...] } or just [...]
+            setIncidents(response.incidents || response.data || []);
+        } catch (error) {
+            console.error('Error fetching incidents:', error);
+        }
     }, []);
 
+    useEffect(() => {
+        fetchIncidents();
+    }, [fetchIncidents]);
+
     const fetchGraphData = useCallback(async (isSilent = false) => {
+        if (!selectedIncident && !demoMode) {
+            setNodes([]);
+            setEdges([]);
+            return;
+        }
+
         try {
             if (!isSilent) setLoading(true);
+            setError(null);
             
             let backendNodes, backendEdges;
             if (demoMode) {
-                const demo = getDemoData();
-                backendNodes = demo.nodes;
-                backendEdges = demo.edges;
+                // If demo mode is active but an incident is selected, 
+                // we can either show a random scenario OR simulation for that incident.
+                // Request simulation from backend.
+                const response = await getTopologyForIncident(selectedIncident || 'latest', true);
+                backendNodes = response.nodes;
+                backendEdges = response.edges;
+            } else if (selectedIncident) {
+                const response = await getTopologyForIncident(selectedIncident);
+                backendNodes = response.nodes;
+                backendEdges = response.edges;
             } else {
+                // Global view if no incident is selected but we want a general graph
                 const response = await getGraph();
                 backendNodes = response.nodes;
                 backendEdges = response.edges;
@@ -149,11 +201,12 @@ const ServiceMapPage = () => {
             setEdges(transformedEdges);
         } catch (error) {
             console.error('Graph Error:', error);
+            setError(error.message || 'Failed to resolve topology');
             if (!isSilent) toast.error('Failed to resolve topology');
         } finally {
             if (!isSilent) setLoading(false);
         }
-    }, [setNodes, setEdges, demoMode, getDemoData]);
+    }, [setNodes, setEdges, demoMode, selectedIncident]);
     
     useEffect(() => {
         if (demoMode) return;
@@ -219,7 +272,7 @@ const ServiceMapPage = () => {
 
     useEffect(() => {
         fetchGraphData();
-    }, [fetchGraphData]);
+    }, [fetchGraphData, selectedIncident, demoMode]);
 
     return (
         <Layout>
@@ -232,13 +285,40 @@ const ServiceMapPage = () => {
                         </div>
                     </div>
                     <div className="toolbar-right">
+                        <div className="incident-selector-wrapper">
+                            <select 
+                                className="cyber-select"
+                                value={selectedIncident}
+                                onChange={(e) => setSelectedIncident(e.target.value)}
+                            >
+                                <option value="">SELECT INCIDENT...</option>
+                                {incidents.map(inc => (
+                                    <option key={inc._id} value={inc._id}>
+                                        {inc.incidentNumber}: {inc.title.substring(0, 30)}...
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
                         <Button 
                             className={`demo-btn ${demoMode ? 'active' : ''}`}
                             onClick={() => setDemoMode(!demoMode)}
-                            icon={<FaPlay />}
+                            icon={demoMode ? <FaStop /> : <FaPlay />}
+                            disabled={!selectedIncident && !demoMode}
                         >
                             {demoMode ? 'LIVE PRODUCTION' : 'SIMULATE PROPAGATION'}
                         </Button>
+
+                        <Button 
+                            variant={isReplaying ? "primary" : "secondary"}
+                            onClick={runReplay}
+                            icon={isReplaying ? <FaStop /> : <FaHistory />}
+                            disabled={!selectedIncident || isReplaying}
+                            className={isReplaying ? 'pulse-border' : ''}
+                        >
+                            {isReplaying ? `REPLAYING STEP ${replayCursor+1}/${replayBatch.length}` : 'REPLAY INCIDENT'}
+                        </Button>
+
                         <Button variant="secondary" onClick={() => setShowInfo(!showInfo)} icon={<FaInfoCircle />}>HOW-TO</Button>
                         {isAdmin && (
                             <Button 
@@ -261,6 +341,19 @@ const ServiceMapPage = () => {
                 <div className="map-viewport">
                     {loading ? (
                         <div className="loading-overlay"><LoadingSpinner text="Tracing Dependencies..." /></div>
+                    ) : error ? (
+                        <div className="placeholder-container error-state">
+                            <FaExclamationTriangle className="text-danger-color text-5xl mb-4" />
+                            <h3>CRITICAL SYSTEM ERROR</h3>
+                            <p>{error}</p>
+                            <Button onClick={() => fetchGraphData()} className="mt-4">RETRY TRACE</Button>
+                        </div>
+                    ) : (!selectedIncident && !demoMode) ? (
+                        <div className="placeholder-container">
+                            <FaProjectDiagram className="placeholder-icon" />
+                            <h3>TOPOLOGY ENGINE STANDBY</h3>
+                            <p>Select an active incident from the terminal above to initialize intelligence trace.</p>
+                        </div>
                     ) : (
                         <div className="w-full h-full relative">
                             <ReactFlow

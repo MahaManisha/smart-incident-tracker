@@ -1,31 +1,37 @@
 import React, { useState, useEffect } from 'react';
-import { getIncidentInsights } from '../../api/incidentApi';
-import { FaLightbulb, FaTools, FaNetworkWired, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
+import { getIncidentInsights, predictSlaBreach } from '../../api/incidentApi';
+import { FaLightbulb, FaTools, FaNetworkWired, FaCheckCircle, FaExclamationCircle, FaShieldAlt, FaClock } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import LoadingSpinner from '../common/LoadingSpinner';
 import './QuickInsightsPanel.css';
 
 const QuickInsightsPanel = ({ incidentId }) => {
   const [insights, setInsights] = useState(null);
+  const [slaRisk, setSlaRisk] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchInsights = async () => {
+    const fetchAllIntelligence = async () => {
       try {
         setLoading(true);
-        const response = await getIncidentInsights(incidentId);
-        if (response.success) {
-          setInsights(response.data);
+        const [insightsRes, slaRes] = await Promise.all([
+          getIncidentInsights(incidentId),
+          predictSlaBreach(incidentId)
+        ]);
+
+        if (insightsRes.success) {
+          setInsights(insightsRes.data);
         }
+        setSlaRisk(slaRes);
       } catch (error) {
-        console.error('Error fetching insights:', error);
+        console.error('Error fetching intelligence:', error);
       } finally {
         setLoading(false);
       }
     };
 
     if (incidentId) {
-      fetchInsights();
+      fetchAllIntelligence();
     }
   }, [incidentId]);
 
@@ -50,6 +56,23 @@ const QuickInsightsPanel = ({ incidentId }) => {
         
         <div className="card-body-dense">
           
+          {/* SLA MONITORING */}
+          {slaRisk && (
+            <div className={`sla-prediction-box risk-${slaRisk.risk.toLowerCase()}`}>
+              <div className="flex justify-between items-center mb-2">
+                 <span className="flex items-center gap-2 font-bold text-[10px] tracking-widest"><FaShieldAlt /> SLA STATUS</span>
+                 <span className="text-[10px] opacity-70">{slaRisk.timeRemainingMin}m remaining</span>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="prediction-label">RISK: {slaRisk.risk}</div>
+                <div className="prediction-msg">{slaRisk.message}</div>
+              </div>
+              <div className="historical-context mt-2">
+                <FaClock className="text-secondary" /> Avg Resolved: {slaRisk.avgResolutionMin}m
+              </div>
+            </div>
+          )}
+
           {/* 1. LIKELY ROOT CAUSE */}
           <div className="insight-section">
             <label className="insight-label">Likely Root Cause</label>

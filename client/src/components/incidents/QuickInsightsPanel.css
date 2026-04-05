@@ -7,6 +7,68 @@
   margin-bottom: 24px;
 }
 
+/* SLA Prediction Box */
+.sla-prediction-box {
+  padding: 16px;
+  border-radius: 4px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.sla-prediction-box::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(45deg, transparent 0%, rgba(255,255,255,0.03) 50%, transparent 100%);
+  animation: shine 3s infinite linear;
+}
+
+.sla-prediction-box.risk-low { border-left: 4px solid var(--success-color); box-shadow: inset 5px 0 15px rgba(0, 255, 127, 0.05); }
+.sla-prediction-box.risk-medium { border-left: 4px solid var(--warning-color); box-shadow: inset 5px 0 15px rgba(255, 225, 53, 0.05); }
+.sla-prediction-box.risk-high { border-left: 4px solid var(--danger-color); box-shadow: inset 5px 0 15px rgba(255, 62, 62, 0.05); animation: pulse-red 2s infinite; }
+
+.prediction-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.risk-low .prediction-label { color: var(--success-color); }
+.risk-medium .prediction-label { color: var(--warning-color); }
+.risk-high .prediction-label { color: var(--danger-color); }
+
+.prediction-msg {
+  font-size: 0.8rem;
+  color: #fff;
+  opacity: 0.9;
+  line-height: 1.4;
+}
+
+.historical-context {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.7rem;
+  color: var(--text-tertiary);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+@keyframes pulse-red {
+  0% { border-color: rgba(255, 62, 62, 0.4); }
+  50% { border-color: rgba(255, 62, 62, 1); box-shadow: 0 0 15px rgba(255, 62, 62, 0.3); }
+  100% { border-color: rgba(255, 62, 62, 0.4); }
+}
+
+@keyframes shine {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+
 .insight-section:last-child {
   margin-bottom: 0;
 }

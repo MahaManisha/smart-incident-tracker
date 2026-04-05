@@ -17,6 +17,7 @@ router.post('/dependencies', verifyToken, isResponderOrAdmin, dependencyControll
 router.delete('/dependencies/:id', verifyToken, isResponderOrAdmin, dependencyController.deleteDependency);
 
 // Impact & Status Analysis
+router.get('/topology/:incidentId', verifyToken, dependencyController.getIncidentTopology);
 router.get('/services/:serviceId/impact', verifyToken, dependencyController.getImpactAnalysis);
 router.get('/services/:serviceId/status', verifyToken, dependencyController.getServiceStatusDetails);
 

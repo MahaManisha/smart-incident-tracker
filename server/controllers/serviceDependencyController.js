@@ -186,6 +186,95 @@ exports.deleteDependency = async (req, res) => {
     }
 };
 
+exports.getIncidentTopology = async (req, res) => {
+    try {
+        const { incidentId } = req.params;
+        const simulation = req.query.simulate === 'true';
+
+        // 1. Fetch the incident
+        const incident = await Incident.findById(incidentId).populate('serviceId');
+        if (!incident && incidentId !== 'demo') {
+            return res.status(404).json({ message: 'Incident not found' });
+        }
+
+        let rootServiceId = incident?.serviceId?._id;
+        let rootServiceName = incident?.serviceId?.name || 'Unknown Service';
+
+        // If it's a demo mode request or root service is missing, we use a fallback or specific demo logic
+        if (incidentId === 'demo') {
+            // This is just a placeholder for the "Simulation" mode if needed, 
+            // but the user wants it to be dynamic based on the incident.
+            // Let's assume for simulation we just show a deeper propagation chain.
+        }
+
+        // 2. Fetch all services and dependencies
+        const [services, dependencies] = await Promise.all([
+            Service.find().select('name status criticality type'),
+            ServiceDependency.find()
+        ]);
+
+        // 3. Calculate Blast Radius (Downstream Impact) for the incident's service
+        const impactedServices = rootServiceId ? await getImpactedServices(rootServiceId) : [];
+        const impactedIds = impactedServices.map(s => s._id.toString());
+
+        // 🧠 PROPAGATION CALCULATION: Requirement 2
+        // Impact Score = dependent services × severity weight
+        const severityWeight = { 'CRITICAL': 10, 'HIGH': 5, 'MEDIUM': 2, 'LOW': 1 };
+        const weight = severityWeight[incident?.severity] || 1;
+        const impactScore = impactedServices.length * weight;
+
+        if (incident && incidentId !== 'demo') {
+            incident.impactScore = impactScore;
+            incident.impactedServices = impactedIds;
+            await incident.save();
+        }
+
+        // 4. Build Nodes
+        const nodes = services.map(s => {
+            const isRoot = rootServiceId && s._id.toString() === rootServiceId.toString();
+            const isDownstream = impactedIds.includes(s._id.toString());
+            
+            let status_color = 'green';
+            if (isRoot) status_color = 'red';
+            else if (isDownstream) status_color = simulation ? 'red' : 'yellow';
+
+            return {
+                id: s._id.toString(),
+                label: s.name,
+                type: s.type || 'Service',
+                status_color,
+                criticality: s.criticality,
+                is_root_cause: isRoot,
+                is_first_failure: isRoot
+            };
+        });
+
+        // 5. Build Edges
+        const edges = dependencies.map(d => {
+            const isPropagationPath = rootServiceId && (
+                d.sourceService.toString() === rootServiceId.toString() ||
+                impactedIds.includes(d.sourceService.toString())
+            );
+
+            return {
+                id: d._id.toString(),
+                source: d.sourceService.toString(),
+                target: d.dependentService.toString(),
+                label: d.dependencyType,
+                is_failure_path: isPropagationPath
+            };
+        });
+
+        // 6. Filter to only show relevant subgraph (Optional, but helps focus)
+        // For now, let's show everything but highlighted, as per usual topology views
+        
+        res.json({ nodes, edges, incident_title: incident?.title });
+    } catch (error) {
+        console.error('Incident Topology Error:', error);
+        res.status(500).json({ message: 'Error fetching incident topology' });
+    }
+};
+
 exports.getImpactAnalysis = async (req, res) => {
     try {
         const { serviceId } = req.params;

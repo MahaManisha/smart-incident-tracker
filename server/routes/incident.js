@@ -19,6 +19,14 @@ const {
 const {
   getIncidentTimeline
 } = require('../controllers/timelineController');
+const {
+  predictSlaBreach,
+  getAISuggestions,
+  getRecommendedResponders,
+  clusterIncidents,
+  generatePostmortem
+} = require('../controllers/intelligenceController');
+
 const { verifyToken, isAdmin, authorize } = require('../middleware/auth');
 const { incidentValidation, validate, paramValidation } = require('../middleware/validation');
 const { auditMiddleware } = require('../middleware/auditLogger');
@@ -225,6 +233,54 @@ router.put(
     });
   },
   updateDocumentation
+);
+
+// ============================================
+// 🧠 INTELLIGENCE ROUTES
+// ============================================
+
+// SLA Prediction
+router.get(
+  '/:id/predict-sla',
+  verifyToken,
+  paramValidation.mongoId,
+  validate,
+  predictSlaBreach
+);
+
+// AI Suggestions (Root Cause + Fix)
+router.get(
+  '/:id/ai-suggestions',
+  verifyToken,
+  paramValidation.mongoId,
+  validate,
+  getAISuggestions
+);
+
+// Smart Assignment Suggestions
+router.get(
+  '/:id/recommended-responders',
+  verifyToken,
+  paramValidation.mongoId,
+  validate,
+  getRecommendedResponders
+);
+
+// Postmortem Report Auto-Gen
+router.get(
+  '/:id/postmortem',
+  verifyToken,
+  paramValidation.mongoId,
+  validate,
+  generatePostmortem
+);
+
+// Global Auto-Clustering
+router.post(
+  '/cluster',
+  verifyToken,
+  isAdmin,
+  clusterIncidents
 );
 
 module.exports = router;

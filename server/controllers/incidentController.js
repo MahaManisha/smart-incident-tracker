@@ -36,6 +36,19 @@ const normalizeIncidents = (incidents) => {
 };
 
 /* ============================
+   HELPER: LOG INCIDENT EVENT (For Replay Feature)
+============================ */
+const logIncidentEvent = async (incident, type, data = {}) => {
+  if (!incident.eventTimeline) incident.eventTimeline = [];
+  incident.eventTimeline.push({
+    type,
+    timestamp: new Date(),
+    data
+  });
+  // Note: We don't save here, let the caller save to batch updates
+};
+
+/* ============================
    CREATE INCIDENT
    ✅ FIXED: Now returns normalized response with "reporter" field
 ============================ */
@@ -73,6 +86,11 @@ const createIncident = async (req, res) => {
       serviceId: serviceId || null,
       status: 'OPEN',
       affectedService: affectedService || undefined
+    });
+
+    // 🧠 REPLAY: Log Creation
+    await logIncidentEvent(incident, 'INCIDENT_CREATED', {
+      title, severity, priority, serviceId
     });
 
     await logAudit('INCIDENT_CREATED', req.user.id, incident._id, {
@@ -583,6 +601,13 @@ const assignIncident = async (req, res) => {
       teamName: team ? team.name : null
     });
 
+    // 🧠 REPLAY: Log Assignment
+    await logIncidentEvent(incident, 'INCIDENT_ASSIGNED', {
+      responder: responder ? responder.name : null,
+      team: team ? team.name : null,
+      assignedAt: incident.assignedAt
+    });
+
     // Send notification
     if (responder) {
       await notifyIncidentAssigned(incident, responder);
@@ -656,6 +681,14 @@ const updateIncidentStatus = async (req, res) => {
         incident.slaResponseStatus = isMet ? 'MET' : 'BREACHED';
       }
     }
+
+    // 🧠 REPLAY: Log Status Update
+    await logIncidentEvent(incident, 'STATUS_UPDATED', {
+      oldStatus,
+      newStatus: status,
+      rootCause: incident.rootCause,
+      resolutionNotes: incident.resolutionNotes
+    });
 
     await incident.save();
 

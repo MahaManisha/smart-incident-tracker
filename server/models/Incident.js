@@ -225,7 +225,42 @@ const incidentSchema = new mongoose.Schema(
       type: String,
       trim: true,
       default: null
-    }
+    },
+
+    // 🧠 INTELLIGENCE UPGRADES
+    impactScore: {
+      type: Number,
+      default: 0
+    },
+
+    isClustered: {
+      type: Boolean,
+      default: false
+    },
+
+    clusterId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'IncidentCluster',
+      default: null
+    },
+
+    slaRiskLevel: {
+      type: String,
+      enum: ['LOW', 'MEDIUM', 'HIGH'],
+      default: 'LOW'
+    },
+
+    aiSuggestedFix: {
+      type: String,
+      default: null
+    },
+    
+    // Timeline of events for Replay capability
+    eventTimeline: [{
+      type: { type: String }, // e.g., 'PROPAGATION', 'STATE_CHANGE'
+      timestamp: { type: Date, default: Date.now },
+      data: mongoose.Schema.Types.Mixed
+    }]
   },
   {
     timestamps: true

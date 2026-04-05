@@ -137,9 +137,33 @@ export const getIncidentInsights = async (id) => {
   return response;
 };
 
-// KB Suggestions based on title
-export const getKBSuggestions = async (title) => {
-  const response = await axiosInstance.get(`/incidents/kb/suggest?title=${encodeURIComponent(title)}`);
+// SLA Prediction
+export const predictSlaBreach = async (id) => {
+  const response = await axiosInstance.get(`/incidents/${id}/predict-sla`);
+  return response;
+};
+
+// AI Suggestions (Root Cause + Fix)
+export const getAISuggestions = async (id) => {
+  const response = await axiosInstance.get(`/incidents/${id}/ai-suggestions`);
+  return response;
+};
+
+// Smart Assignment Suggestions
+export const getRecommendedResponders = async (id) => {
+  const response = await axiosInstance.get(`/incidents/${id}/recommended-responders`);
+  return response;
+};
+
+// Auto Postmortem Report
+export const generatePostmortemReport = async (id) => {
+  const response = await axiosInstance.get(`/incidents/${id}/postmortem`);
+  return response;
+};
+
+// Auto Clustering (Admin Only)
+export const clusterIncidents = async () => {
+  const response = await axiosInstance.post('/incidents/cluster');
   return response;
 };
 
