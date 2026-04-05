@@ -143,6 +143,12 @@ export const predictSlaBreach = async (id) => {
   return response;
 };
 
+// KB Suggestions based on title (Backward compatibility)
+export const getKBSuggestions = async (title) => {
+  const response = await axiosInstance.get(`/incidents/kb/suggest?title=${encodeURIComponent(title)}`);
+  return response;
+};
+
 // AI Suggestions (Root Cause + Fix)
 export const getAISuggestions = async (id) => {
   const response = await axiosInstance.get(`/incidents/${id}/ai-suggestions`);
@@ -152,6 +158,12 @@ export const getAISuggestions = async (id) => {
 // Smart Assignment Suggestions
 export const getRecommendedResponders = async (id) => {
   const response = await axiosInstance.get(`/incidents/${id}/recommended-responders`);
+  return response;
+};
+
+// Get Incident Event Timeline (for Replay)
+export const getIncidentTimeline = async (id) => {
+  const response = await axiosInstance.get(`/incidents/${id}/timeline`);
   return response;
 };
 
