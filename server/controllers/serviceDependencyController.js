@@ -213,19 +213,30 @@ exports.getIncidentTopology = async (req, res) => {
             ServiceDependency.find()
         ]);
 
-        // 3. Calculate Blast Radius (Downstream Impact) for the incident's service
+        // 🧠 ALWAYS GENERATE: Requirement - Ignore status, generate for all incident states
+        console.log(`[TOPOLOGY] Generating intelligence map for ${incident.status} incident: ${incident.incidentNumber}`);
+
+        // 3. Calculate Blast Radius (Downstream Impact)
         const impactedServices = rootServiceId ? await getImpactedServices(rootServiceId) : [];
         const impactedIds = impactedServices.map(s => s._id.toString());
 
-        // 🧠 PROPAGATION CALCULATION: Requirement 2
-        // Impact Score = dependent services × severity weight
+        // 🧠 PROPAGATION CALCULATION
         const severityWeight = { 'CRITICAL': 10, 'HIGH': 5, 'MEDIUM': 2, 'LOW': 1 };
         const weight = severityWeight[incident?.severity] || 1;
         const impactScore = impactedServices.length * weight;
 
+        // Persist IQ metrics for all active/resolved incidents
         if (incident && incidentId !== 'demo') {
             incident.impactScore = impactScore;
             incident.impactedServices = impactedIds;
+            // Add to timeline if first time
+            if (incident.eventTimeline.length === 0) {
+                incident.eventTimeline.push({
+                    type: 'TOPOLOGY_INITIALIZED',
+                    timestamp: new Date(),
+                    data: { impactScore, impactedCount: impactedIds.length }
+                });
+            }
             await incident.save();
         }
 

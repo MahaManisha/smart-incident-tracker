@@ -118,6 +118,13 @@ const ServiceMapPage = () => {
                 backendEdges = response.edges;
             } else if (selectedIncident) {
                 const response = await getTopologyForIncident(selectedIncident);
+                console.log("🧠 TOPOLOGY INTELLIGENCE RECEIVED:", response);
+                
+                if (!response.nodes || response.nodes.length === 0) {
+                    console.warn("⚠️ Empty nodes received from intelligence engine");
+                    setError("No topology data available for this incident's service configuration.");
+                }
+
                 backendNodes = response.nodes;
                 backendEdges = response.edges;
             } else {
