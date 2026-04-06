@@ -267,33 +267,17 @@ const getAllIncidents = async (req, res) => {
     if (req.user.role === 'REPORTER') {
       query.reportedBy = req.user.id;
     }
-    // Responder can generally see all tickets in many systems, 
-    // or arguably just their team's. 
-    // For now, adhering to "Responder sees all" or "Assigned only"?
-    // The previous code had "if (req.user.role === 'RESPONDER') { query.assignedTo = req.user.id; }" 
-    // This implies Responders only see their own tickets in the main list. 
-    // Let's preserve that logic if it was intended, OR assume Responders need to see unassigned ones too.
-    // The prompt implies "Advanced Search" for the list. 
-    // Let's keep the user restriction for stricter security if that was the legacy behavior.
-    if (req.user.role === 'RESPONDER') {
-      // If Responders should see ALL tickets to pick them up, we shouldn't restrict this.
-      // However, looking at line 107 of original file: 
-      // "if (req.user.role === 'RESPONDER') { query.assignedTo = req.user.id; }"
-      // This suggests strictly personal view. 
-      // But typically there's a "Unassigned" view too.
-      // Let's RELAX this specific constraint for "Search" purposes so they can find tickets to pick up?
-      // Or keep it strict? 
-      // Let's keep it strict for the "My Incidents" default behavior but maybe allow searching if explicitly asked?
-      // Actually, typically Responders need to see Unassigned tickets to pick them.
-      // Let's allow Responders to see Assigned to Them OR Unassigned.
-      query.$or = [
-        { assignedTo: req.user.id },
-        { assignedTo: null }
-      ];
-    }
+    // Responders should see ALL incidents for complete system awareness.
+    // They can use filtering to narrow down to their own assignments.
 
-    // 2. Apply Filters
-    if (status) query.status = status;
+    // 2. Apply Filters (Supports multi-select via comma-separated strings)
+    if (status) {
+      if (status.includes(',')) {
+        query.status = { $in: status.split(',').map(s => s.trim()) };
+      } else {
+        query.status = status;
+      }
+    }
     if (severity) query.severity = severity;
     if (priority) query.priority = priority;
     if (type) query.type = type;

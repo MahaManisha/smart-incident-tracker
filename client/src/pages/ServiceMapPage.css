@@ -72,6 +72,22 @@
   border-color: var(--warning-color);
 }
 
+.node-investigating {
+  border-color: var(--accent-cyan);
+  border-width: 2px;
+  animation: investigating-pulse 2s infinite alternate;
+}
+
+.node-propagation {
+  border-color: var(--warning-color);
+  opacity: 0.85;
+}
+
+@keyframes investigating-pulse {
+  from { box-shadow: 0 0 10px var(--accent-cyan); }
+  to { box-shadow: 0 0 25px var(--accent-cyan); }
+}
+
 .node-root {
   border-color: var(--danger-color);
   border-width: 2px;
@@ -97,6 +113,16 @@
   padding: 4px 0;
   letter-spacing: 1.5px;
   z-index: 10;
+}
+
+.node-crown.investigating {
+  background: var(--accent-cyan);
+  box-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
+}
+
+.node-crown.propagation {
+  background: var(--warning-color);
+  color: #000;
 }
 
 .node-spark {
@@ -394,4 +420,40 @@
   position: relative;
   background: #0a0a0f;
   margin-top: 40px;
+}
+/* AI Intelligence Banner */
+.ai-intelligence-banner {
+  background: linear-gradient(90deg, rgba(0, 243, 255, 0.1) 0%, rgba(255, 0, 127, 0.1) 100%);
+  border: 1px solid rgba(0, 243, 255, 0.3);
+  padding: 15px 25px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  animation: bannerSlideDown 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes bannerSlideDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.ai-badge {
+  background: var(--accent-cyan);
+  color: #000;
+  font-family: var(--font-heading);
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: 2px;
+  letter-spacing: 1px;
+}
+
+.ai-banner-content p {
+  color: #fff;
+  font-size: 0.85rem;
+  margin: 0;
+  opacity: 0.9;
+  letter-spacing: 0.5px;
 }

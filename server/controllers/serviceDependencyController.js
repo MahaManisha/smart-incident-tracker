@@ -4,6 +4,7 @@ const { getImpactedServices } = require('../services/serviceImpactService');
 
 const Service = require('../models/Service');
 const Incident = require('../models/Incident');
+const IntelligenceService = require('../services/intelligenceService');
 
 exports.createDependency = async (req, res) => {
     try {
@@ -52,11 +53,11 @@ exports.getGraph = async (req, res) => {
             ServiceDependency.find()
         ]);
 
-        // Get active incidents for health status
+        // Get all active and investigating incidents
         const activeIncidents = await Incident.find({
             status: { $in: ['OPEN', 'ASSIGNED', 'INVESTIGATING'] },
             serviceId: { $ne: null }
-        }).select('serviceId priority');
+        }).select('serviceId priority status reportedAt');
 
         const nodes = services.map(s => {
             const serviceIncidents = activeIncidents.filter(inc =>
@@ -96,6 +97,7 @@ exports.getGraph = async (req, res) => {
         }));
 
         // Calculate Root Cause and First Failure
+        // Calculate Root Cause and failure propagation for all active nodes
         const downNodes = nodes.filter(n => n.status_color !== 'green');
         
         let globalFirstFailureNodeId = null;
@@ -106,15 +108,25 @@ exports.getGraph = async (req, res) => {
             if (sortedByTime.length > 0) globalFirstFailureNodeId = sortedByTime[0].id.toString();
         }
 
+        // Collect all propagation IDs from investigating incidents
+        const propagationIds = new Set();
+        const investigatingIncidents = activeIncidents.filter(inc => inc.status === 'INVESTIGATING');
+        for (const inc of investigatingIncidents) {
+            const impacted = await getImpactedServices(inc.serviceId);
+            impacted.forEach(s => propagationIds.add(s._id.toString()));
+        }
+
         nodes.forEach(n => {
             n.is_first_failure = globalFirstFailureNodeId === n.id.toString();
+            n.is_investigating = investigatingIncidents.some(inc => inc.serviceId?.toString() === n.id.toString());
+            n.is_on_propagation_path = propagationIds.has(n.id.toString());
 
-            if (n.status_color !== 'green') {
+            if (n.status_color !== 'green' || n.is_on_propagation_path) {
                 const upstreams = dependencies.filter(d => d.dependentService.toString() === n.id.toString());
                 const upstreamDown = upstreams.some(u => 
                     downNodes.some(dn => dn.id.toString() === u.sourceService.toString())
                 );
-                n.is_root_cause = !upstreamDown;
+                n.is_root_cause = !upstreamDown && !n.is_on_propagation_path;
             } else {
                 n.is_root_cause = false;
             }
@@ -197,44 +209,40 @@ exports.getIncidentTopology = async (req, res) => {
             return res.status(404).json({ message: 'Incident not found' });
         }
 
-        let rootServiceId = incident?.serviceId?._id;
-        let rootServiceName = incident?.serviceId?.name || 'Unknown Service';
-
-        // If it's a demo mode request or root service is missing, we use a fallback or specific demo logic
-        if (incidentId === 'demo') {
-            // This is just a placeholder for the "Simulation" mode if needed, 
-            // but the user wants it to be dynamic based on the incident.
-            // Let's assume for simulation we just show a deeper propagation chain.
-        }
-
-        // 2. Fetch all services and dependencies
-        const [services, dependencies] = await Promise.all([
+        // 2. AI Intelligence (AUTOMATIC USING LLM)
+        const [services, dependencies, aiAnalysis] = await Promise.all([
             Service.find().select('name status criticality type'),
-            ServiceDependency.find()
+            ServiceDependency.find(),
+            IntelligenceService.generateAIIncidentTopology(incidentId)
         ]);
 
-        // 🧠 ALWAYS GENERATE: Requirement - Ignore status, generate for all incident states
-        console.log(`[TOPOLOGY] Generating intelligence map for ${incident.status} incident: ${incident.incidentNumber}`);
+        const aiRootIds = aiAnalysis.rootCauseIds || [];
+        const aiPropagationIds = aiAnalysis.propagationPathIds || [];
 
-        // 3. Calculate Blast Radius (Downstream Impact)
+        // 3. Merge Logic (Root + AI Prediction)
+        const rootServiceId = incident?.serviceId?._id || (aiRootIds.length > 0 ? aiRootIds[0] : null);
         const impactedServices = rootServiceId ? await getImpactedServices(rootServiceId) : [];
-        const impactedIds = impactedServices.map(s => s._id.toString());
+        const impactedIds = new Set(impactedServices.map(s => s._id.toString()));
+        
+        // Add AI detected paths to the impacted set
+        aiPropagationIds.forEach(id => impactedIds.add(id));
+        const finalImpactedList = Array.from(impactedIds);
 
         // 🧠 PROPAGATION CALCULATION
         const severityWeight = { 'CRITICAL': 10, 'HIGH': 5, 'MEDIUM': 2, 'LOW': 1 };
         const weight = severityWeight[incident?.severity] || 1;
-        const impactScore = impactedServices.length * weight;
+        const impactScore = finalImpactedList.length * weight;
 
         // Persist IQ metrics for all active/resolved incidents
         if (incident && incidentId !== 'demo') {
             incident.impactScore = impactScore;
-            incident.impactedServices = impactedIds;
-            // Add to timeline if first time
-            if (incident.eventTimeline.length === 0) {
+            incident.impactedServices = finalImpactedList;
+            // Add AI Analysis to incident event timeline if new
+            if (!incident.eventTimeline.some(e => e.type === 'AI_TOPOLOGY_SUMMARY')) {
                 incident.eventTimeline.push({
-                    type: 'TOPOLOGY_INITIALIZED',
+                    type: 'AI_TOPOLOGY_SUMMARY',
                     timestamp: new Date(),
-                    data: { impactScore, impactedCount: impactedIds.length }
+                    data: { analysis: aiAnalysis.analysis, confidence: aiAnalysis.confidence }
                 });
             }
             await incident.save();
@@ -242,8 +250,8 @@ exports.getIncidentTopology = async (req, res) => {
 
         // 4. Build Nodes
         const nodes = services.map(s => {
-            const isRoot = rootServiceId && s._id.toString() === rootServiceId.toString();
-            const isDownstream = impactedIds.includes(s._id.toString());
+            const isRoot = (rootServiceId && s._id.toString() === rootServiceId.toString()) || aiRootIds.includes(s._id.toString());
+            const isDownstream = finalImpactedList.includes(s._id.toString());
             
             let status_color = 'green';
             if (isRoot) status_color = 'red';
@@ -262,24 +270,31 @@ exports.getIncidentTopology = async (req, res) => {
 
         // 5. Build Edges
         const edges = dependencies.map(d => {
-            const isPropagationPath = rootServiceId && (
+            const isPropagationPath = (rootServiceId && (
                 d.sourceService.toString() === rootServiceId.toString() ||
-                impactedIds.includes(d.sourceService.toString())
-            );
+                finalImpactedList.includes(d.sourceService.toString())
+            )) || aiPropagationIds.includes(d.sourceService.toString());
 
             return {
                 id: d._id.toString(),
                 source: d.sourceService.toString(),
                 target: d.dependentService.toString(),
                 label: d.dependencyType,
-                is_failure_path: isPropagationPath
+                is_failure_path: isPropagationPath,
+                is_ai_predicted: aiPropagationIds.includes(d.sourceService.toString())
             };
         });
 
         // 6. Filter to only show relevant subgraph (Optional, but helps focus)
         // For now, let's show everything but highlighted, as per usual topology views
         
-        res.json({ nodes, edges, incident_title: incident?.title });
+        res.json({ 
+            nodes, 
+            edges, 
+            incident_title: incident?.title,
+            ai_analysis: aiAnalysis.analysis,
+            ai_confidence: aiAnalysis.confidence
+        });
     } catch (error) {
         console.error('Incident Topology Error:', error);
         res.status(500).json({ message: 'Error fetching incident topology' });

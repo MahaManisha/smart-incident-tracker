@@ -47,6 +47,7 @@ const ServiceMapPage = () => {
 
     const [incidents, setIncidents] = useState([]);
     const [selectedIncident, setSelectedIncident] = useState(''); // Stores Incident ID
+    const [aiAnalysis, setAiAnalysis] = useState(null);
     const [error, setError] = useState(null);
 
     // Replay State
@@ -86,8 +87,9 @@ const ServiceMapPage = () => {
     const fetchIncidents = useCallback(async () => {
         try {
             const response = await getAllIncidents({ status: 'OPEN,ASSIGNED,INVESTIGATING' });
-            // The response might be { incidents: [...] } or just [...]
-            setIncidents(response.incidents || response.data || []);
+            // Axios interceptor returns response.data directly
+            const incidentsList = response.incidents || response.data || [];
+            setIncidents(Array.isArray(incidentsList) ? incidentsList : (incidentsList.incidents || []));
         } catch (error) {
             console.error('Error fetching incidents:', error);
         }
@@ -98,41 +100,39 @@ const ServiceMapPage = () => {
     }, [fetchIncidents]);
 
     const fetchGraphData = useCallback(async (isSilent = false) => {
-        if (!selectedIncident && !demoMode) {
-            setNodes([]);
-            setEdges([]);
-            return;
-        }
-
         try {
             if (!isSilent) setLoading(true);
             setError(null);
             
-            let backendNodes, backendEdges;
+            let backendNodes, backendEdges, aiIntel = null;
             if (demoMode) {
                 // If demo mode is active but an incident is selected, 
                 // we can either show a random scenario OR simulation for that incident.
                 // Request simulation from backend.
                 const response = await getTopologyForIncident(selectedIncident || 'latest', true);
-                backendNodes = response.nodes;
-                backendEdges = response.edges;
+                backendNodes = response.nodes || [];
+                backendEdges = response.edges || [];
             } else if (selectedIncident) {
                 const response = await getTopologyForIncident(selectedIncident);
                 console.log("🧠 TOPOLOGY INTELLIGENCE RECEIVED:", response);
                 
-                if (!response.nodes || response.nodes.length === 0) {
+                const data = response;
+                if (!data.nodes || data.nodes.length === 0) {
                     console.warn("⚠️ Empty nodes received from intelligence engine");
                     setError("No topology data available for this incident's service configuration.");
                 }
 
-                backendNodes = response.nodes;
-                backendEdges = response.edges;
+                backendNodes = data.nodes || [];
+                backendEdges = data.edges || [];
+                aiIntel = { analysis: data.ai_analysis, confidence: data.ai_confidence };
             } else {
                 // Global view if no incident is selected but we want a general graph
                 const response = await getGraph();
-                backendNodes = response.nodes;
-                backendEdges = response.edges;
+                backendNodes = response.nodes || [];
+                backendEdges = response.edges || [];
             }
+
+            setAiAnalysis(aiIntel);
 
             // Step 3 & 5: Visible Propagation Logic
             const transformedNodes = backendNodes.map((node, index) => {
@@ -145,9 +145,15 @@ const ServiceMapPage = () => {
                     id: node.id,
                     data: {
                         label: (
-                            <div className={`node-v3 ${statusColor} ${node.is_root_cause ? 'node-root' : ''}`}>
+                            <div className={`node-v3 ${statusColor} ${node.is_root_cause ? 'node-root' : ''} ${node.is_investigating ? 'node-investigating' : ''} ${node.is_on_propagation_path ? 'node-propagation' : ''}`}>
                                 {node.is_root_cause && (
                                     <div className="node-crown"><FaSkullCrossbones /> ROOT CAUSE</div>
+                                )}
+                                {node.is_investigating && (
+                                    <div className="node-crown investigating"><FaBug /> INVESTIGATING</div>
+                                )}
+                                {node.is_on_propagation_path && !node.is_investigating && (
+                                    <div className="node-crown propagation"><FaExclamationTriangle /> IMPACTED</div>
                                 )}
                                 {node.is_first_failure && (
                                     <div className="node-spark"><FaBolt /> FIRST FAIL</div>
