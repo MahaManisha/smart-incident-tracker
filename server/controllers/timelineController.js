@@ -1,6 +1,6 @@
 const AuditLog = require('../models/AuditLog');
 const Incident = require('../models/Incident');
-const User = require('../models/user');
+const User = require('../models/User');
 const mongoose = require('mongoose');
 
 /**

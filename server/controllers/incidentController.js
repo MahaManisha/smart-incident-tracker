@@ -1,5 +1,5 @@
 const Incident = require('../models/Incident');
-const User = require('../models/user');
+const User = require('../models/User');
 const OnCallSchedule = require('../models/OnCallSchedule');
 const slaService = require('../services/slaService');
 const SLA = require('../models/SLA');

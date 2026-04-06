@@ -45,7 +45,7 @@ const broadcastGraphUpdate = () => {
 // Notify when incident is created
 const notifyIncidentCreated = async (incident) => {
   try {
-    const User = require('../models/user');
+    const User = require('../models/User');
     const admins = await User.find({ role: 'ADMIN', isActive: true });
 
     const notifications = admins.map(async (admin) => {
@@ -93,7 +93,7 @@ const notifyIncidentAssigned = async (incident, responder) => {
 // Notify when incident is AUTO assigned (Notifies Admin too)
 const notifyIncidentAutoAssigned = async (incident, responderId) => {
   try {
-    const User = require('../models/user');
+    const User = require('../models/User');
     const responder = await User.findById(responderId);
     if (!responder) return;
 
@@ -142,7 +142,7 @@ const notifyIncidentResolved = async (incident, reporter) => {
 // Notify status update
 const notifyStatusUpdate = async (incident, oldStatus, newStatus) => {
   try {
-    const User = require('../models/user');
+    const User = require('../models/User');
     const notifications = [];
 
     // Notify Reporter
@@ -201,7 +201,7 @@ const notifySLAWarning = async (incident) => {
 // Notify SLA Breach
 const notifySLABreach = async (incident) => {
   try {
-    const User = require('../models/user');
+    const User = require('../models/User');
     const admins = await User.find({ role: 'ADMIN', isActive: true });
 
     // Notify Responder
@@ -247,7 +247,7 @@ const notifyEscalation = async (incident, escalatedTo, reason) => {
 // Notify Incident Deleted
 const notifyIncidentDeleted = async (incident, deleterId) => {
   try {
-    const User = require('../models/user');
+    const User = require('../models/User');
     const admins = await User.find({ role: 'ADMIN', isActive: true });
 
     const notifications = [];

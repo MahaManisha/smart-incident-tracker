@@ -1,5 +1,5 @@
 const Incident = require('../models/Incident');
-const User = require('../models/user');
+const User = require('../models/User');
 // const Team = require('../models/Team'); // If needed directly
 const { calculateResolutionTime, isSLAMet } = require('./slaService');
 

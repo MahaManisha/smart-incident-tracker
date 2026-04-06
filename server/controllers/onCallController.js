@@ -1,5 +1,5 @@
 const OnCallSchedule = require('../models/OnCallSchedule');
-const User = require('../models/user');
+const User = require('../models/User');
 const { logAudit } = require('../middleware/auditLogger');
 
 /**
