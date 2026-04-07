@@ -72,6 +72,11 @@
   padding-right: var(--spacing-xl);
 }
 
+.form-select option {
+  background-color: var(--bg-secondary, #0a0a0f);
+  color: #fff;
+}
+
 /* Switches & Toggles */
 .switch {
   position: relative;

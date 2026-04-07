@@ -7,6 +7,8 @@ const Service = require('../models/Service');
  * So we follow the 'sourceService' -> 'dependentService' links.
  */
 const getImpactedServices = async (serviceId) => {
+    if (!serviceId) return [];
+    
     const impactedSet = new Set();
     const queue = [serviceId.toString()];
     const visited = new Set();

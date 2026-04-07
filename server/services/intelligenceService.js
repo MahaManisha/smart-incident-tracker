@@ -1,7 +1,9 @@
 const Incident = require('../models/Incident');
 const User = require('../models/User');
 const Service = require('../models/Service');
+const Documentation = require('../models/Documentation');
 const { getImpactedServices } = require('./serviceImpactService');
+const { GoogleGenAI } = require('@google/genai');
 
 /**
  * Predict SLA Breach Risk for an incident
@@ -222,30 +224,127 @@ const generateAIIncidentTopology = async (incidentId) => {
     if (!incident) throw new Error('Incident not found');
 
     const allServices = await Service.find();
-    
-    // Simulate LLM Analysis
-    // 1. Semantic Matching: Check if description mentions other service names
-    const incidentText = (incident.title + " " + (incident.description || "")).toLowerCase();
-    const relatedServiceIds = allServices
-        .filter(s => incidentText.includes(s.name.toLowerCase()) || 
-                     (incident.serviceId && s._id.toString() === incident.serviceId._id.toString()))
-        .map(s => s._id.toString());
+    let rootCauseIds = [];
+    let propagationPathIds = [];
+    let analysisText = "";
+    let confidence = 75;
+    let suggestedFix = null;
+    let suggestedDocId = null;
 
-    // 2. Propagation Logic (Simplified LLM Heuristic)
-    // In a real system, the LLM would output JSON nodes/edges.
-    // For now, we enhance the existing dependency data with AI insights.
-    const impactedByAnalysis = await getImpactedServices(relatedServiceIds[0] || incident.serviceId?._id);
-    const impactedIds = impactedByAnalysis.map(s => s._id.toString());
-    
-    // 3. Confidence Calculation
-    const confidence = incidentText.length > 50 ? 92 : 75;
+    if (process.env.GEMINI_API_KEY) {
+        try {
+            const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+            const docs = await Documentation.find().select('_id title rootCause resolutionSteps');
+            
+            const prompt = `
+            You are a Site Reliability Engineer AI Engine. 
+            Analyze the following Incident and map its topology, suggest a fix, and pair it with any existing documentation.
+            
+            Incident Details:
+            Title: ${incident.title}
+            Description: ${incident.description}
+            Category: ${incident.type}
+
+            Available Services in System:
+            ${JSON.stringify(allServices.map(s => ({ id: s._id, name: s.name, type: s.type })))}
+
+            Available Internal Documentation:
+            ${JSON.stringify(docs.map(d => ({ id: d._id, title: d.title, resolve: d.resolutionSteps })))}
+
+            Return ONLY a valid JSON object matching exactly this structure (no markdown fences, no other text):
+            {
+                "rootCauseServiceIds": ["string array of service ids likely to be the root causes based on incident text"],
+                "propagationServiceIds": ["string array of service ids that would be downstream impacted"],
+                "topologyEdges": [
+                    { "source": "serviceId", "target": "serviceId", "label": "HARD or SOFT" }
+                ],
+                "analysis": "Detailed engineering explanation of how the failure propagated.",
+                "suggestedFix": "A comprehensive step-by-step resolution strategy, similar to what chatgpt would suggest for this type of failure.",
+                "suggestedDocumentationId": "If an available document exactly matches or helps, string of doc ID, otherwise null"
+            }
+            `;
+
+            const response = await ai.models.generateContent({
+                model: 'gemini-2.5-flash',
+                contents: prompt,
+                config: { responseMimeType: "application/json" }
+            });
+            const result = JSON.parse(response.text);
+
+            rootCauseIds = result.rootCauseServiceIds || [];
+            propagationPathIds = result.propagationServiceIds || [];
+            analysisText = result.analysis;
+            suggestedFix = result.suggestedFix;
+            suggestedDocId = result.suggestedDocumentationId;
+            confidence = 96;
+            
+            if(suggestedFix) {
+                incident.aiSuggestedFix = suggestedFix;
+                await incident.save();
+            }
+            
+            // Return raw dynamic edges to the controller so it overrides the DB
+            return {
+                incidentId: incident._id,
+                analysis: analysisText,
+                confidence,
+                rootCauseIds,
+                propagationPathIds,
+                suggestedDocId,
+                aiGeneratedEdges: result.topologyEdges || [],
+                isAIGenerated: true,
+                generatedAt: new Date()
+            };
+        } catch (error) {
+            console.error("LLM Generation Failed, falling back to heuristic:", error.message);
+        }
+    }
+
+    // Fallback if LLM failed or no API key is provided
+    if (rootCauseIds.length === 0) {
+        const incidentText = (incident.title + " " + (incident.description || "")).toLowerCase();
+        rootCauseIds = allServices
+            .filter(s => (s.name && incidentText.includes(s.name.toLowerCase())) || 
+                         (incident.serviceId && s._id.toString() === incident.serviceId._id.toString()))
+            .map(s => s._id.toString());
+
+        const impactedByAnalysis = await getImpactedServices(rootCauseIds[0] || incident.serviceId?._id);
+        propagationPathIds = impactedByAnalysis.map(s => s._id.toString());
+        confidence = incidentText.length > 50 ? 92 : 75;
+        
+        // Mock ChatGPT-like response behavior if no API Key is provided
+        analysisText = `Simulated AI Analysis: Based on heuristic classification of "${incident.title}", the language heuristics identify a primary fault point propagating to downstream dependencies. Real LLM inference is currently missing API keys.`;
+        
+        suggestedFix = `1. Isolate the affected ${rootCauseIds.length} root services from the load balancer.\n2. Verify the configuration variables and restart the containers.\n3. Monitor the ${propagationPathIds.length} downstream components for recovery.\n4. Run integration tests to ensure API stability.`;
+        
+        // Simple heuristic document search
+        const docs = await Documentation.find();
+        if (docs.length > 0) {
+            // Find a document that matches words in the title
+            const matchingDoc = docs.find(d => {
+                const docTitleText = d.title.toLowerCase();
+                // Check if any significant word overlaps
+                return docTitleText.includes(incidentText) || incidentText.includes(docTitleText);
+            });
+            if (matchingDoc) {
+                suggestedDocId = matchingDoc._id.toString();
+            }
+        }
+
+        if (suggestedFix) {
+            incident.aiSuggestedFix = suggestedFix;
+            await incident.save();
+        }
+    }
 
     return {
         incidentId: incident._id,
-        analysis: `AI Analysis complete. Based on incident context "${incident.title}", we have detected failure roots in ${relatedServiceIds.length} services with a propagation path affecting ${impactedIds.length} downstream components.`,
+        analysis: analysisText,
         confidence,
-        rootCauseIds: relatedServiceIds,
-        propagationPathIds: impactedIds,
+        rootCauseIds,
+        propagationPathIds,
+        suggestedDocId,
+        aiGeneratedEdges: [],
         isAIGenerated: true,
         generatedAt: new Date()
     };

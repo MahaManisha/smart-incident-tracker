@@ -370,7 +370,68 @@
 .mini-ttl { font-size: 0.9rem; color: #fff; font-weight: 600; margin-bottom: 16px; }
 
 .mini-ftr { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-tertiary); }
+/* AI Insights Overlay */
+.ai-insight-overlay {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 400px;
+    background: rgba(10, 10, 15, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--primary-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    color: var(--text-color);
+    z-index: 50;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(0, 243, 255, 0.1);
+    animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
+.ai-overlay-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.ai-overlay-header h3 {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    color: white;
+    letter-spacing: 1px;
+}
+
+.ai-analysis-text {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.ai-fix {
+    background: rgba(0, 243, 255, 0.05);
+    border-left: 3px solid var(--accent-cyan);
+    padding: 0.75rem;
+    border-radius: 0 4px 4px 0;
+}
+
+.ai-doc-link {
+    display: flex;
+    flex-direction: column;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 .mini-btn {
   font-family: var(--font-heading);
   font-size: 0.65rem;

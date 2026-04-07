@@ -106,12 +106,17 @@ const ServiceMapPage = () => {
             
             let backendNodes, backendEdges, aiIntel = null;
             if (demoMode) {
-                // If demo mode is active but an incident is selected, 
-                // we can either show a random scenario OR simulation for that incident.
                 // Request simulation from backend.
                 const response = await getTopologyForIncident(selectedIncident || 'latest', true);
-                backendNodes = response.nodes || [];
-                backendEdges = response.edges || [];
+                const data = response;
+                backendNodes = data.nodes || [];
+                backendEdges = data.edges || [];
+                aiIntel = { 
+                    analysis: data.ai_analysis, 
+                    confidence: data.ai_confidence,
+                    suggested_fix: data.suggested_fix,
+                    suggested_doc_id: data.suggested_doc_id
+                };
             } else if (selectedIncident) {
                 const response = await getTopologyForIncident(selectedIncident);
                 console.log("🧠 TOPOLOGY INTELLIGENCE RECEIVED:", response);
@@ -124,7 +129,12 @@ const ServiceMapPage = () => {
 
                 backendNodes = data.nodes || [];
                 backendEdges = data.edges || [];
-                aiIntel = { analysis: data.ai_analysis, confidence: data.ai_confidence };
+                aiIntel = { 
+                    analysis: data.ai_analysis, 
+                    confidence: data.ai_confidence,
+                    suggested_fix: data.suggested_fix,
+                    suggested_doc_id: data.suggested_doc_id
+                };
             } else {
                 // Global view if no incident is selected but we want a general graph
                 const response = await getGraph();
@@ -382,6 +392,43 @@ const ServiceMapPage = () => {
                                 <Background color="#0a0a0f" gap={50} />
                                 <Controls />
                             </ReactFlow>
+
+                            {/* ChatGPT AI Intelligence Overlay */}
+                            {aiAnalysis && (
+                                <div className="ai-insight-overlay slide-down">
+                                    <div className="ai-overlay-header">
+                                        <FaBolt className="text-primary-color" />
+                                        <h3>AI INCIDENT INSIGHTS</h3>
+                                    </div>
+                                    <div className="ai-overlay-body">
+                                        <p className="ai-analysis-text">{aiAnalysis.analysis}</p>
+                                        
+                                        {aiAnalysis.suggested_fix && (
+                                            <div className="ai-fix mt-3">
+                                                <h4 className="text-accent-cyan flex items-center gap-2 mb-1">
+                                                    <FaBug /> AI Suggested Fix
+                                                </h4>
+                                                <p className="text-sm italic">{aiAnalysis.suggested_fix}</p>
+                                            </div>
+                                        )}
+                                        
+                                        {aiAnalysis.suggested_doc_id ? (
+                                            <div className="ai-doc-link mt-3 pt-3 border-t border-white/10">
+                                                <h4 className="flex items-center gap-2 mb-1 text-green-400">
+                                                    <FaInfoCircle /> Documentation Found
+                                                </h4>
+                                                <Link to={`/knowledge-base`} className="text-xs neon-text underline">
+                                                    View Knowledge Base Document #{aiAnalysis.suggested_doc_id}
+                                                </Link>
+                                            </div>
+                                        ) : (
+                                            <div className="ai-doc-link mt-3 pt-3 border-t border-white/10 text-gray-500 text-xs">
+                                                No related documentation found. AI generated novel fix based on past parameters.
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
 
                             {selectedNode && (
                                 <div className="intelligence-panel slide-in">

@@ -235,17 +235,28 @@ exports.getIncidentTopology = async (req, res) => {
 
         // Persist IQ metrics for all active/resolved incidents
         if (incident && incidentId !== 'demo') {
-            incident.impactScore = impactScore;
-            incident.impactedServices = finalImpactedList;
+            const updates = {
+                $set: {
+                    impactScore: impactScore,
+                    impactedServices: finalImpactedList
+                }
+            };
+            
             // Add AI Analysis to incident event timeline if new
-            if (!incident.eventTimeline.some(e => e.type === 'AI_TOPOLOGY_SUMMARY')) {
-                incident.eventTimeline.push({
-                    type: 'AI_TOPOLOGY_SUMMARY',
-                    timestamp: new Date(),
-                    data: { analysis: aiAnalysis.analysis, confidence: aiAnalysis.confidence }
-                });
+            if (!incident.eventTimeline) {
+                incident.eventTimeline = [];
             }
-            await incident.save();
+            if (!incident.eventTimeline.some(e => e.type === 'AI_TOPOLOGY_SUMMARY')) {
+                updates.$push = {
+                    eventTimeline: {
+                        type: 'AI_TOPOLOGY_SUMMARY',
+                        timestamp: new Date(),
+                        data: { analysis: aiAnalysis.analysis, confidence: aiAnalysis.confidence }
+                    }
+                };
+            }
+            
+            await Incident.updateOne({ _id: incident._id }, updates);
         }
 
         // 4. Build Nodes
@@ -269,21 +280,33 @@ exports.getIncidentTopology = async (req, res) => {
         });
 
         // 5. Build Edges
-        const edges = dependencies.map(d => {
-            const isPropagationPath = (rootServiceId && (
-                d.sourceService.toString() === rootServiceId.toString() ||
-                finalImpactedList.includes(d.sourceService.toString())
-            )) || aiPropagationIds.includes(d.sourceService.toString());
-
-            return {
-                id: d._id.toString(),
-                source: d.sourceService.toString(),
-                target: d.dependentService.toString(),
-                label: d.dependencyType,
-                is_failure_path: isPropagationPath,
-                is_ai_predicted: aiPropagationIds.includes(d.sourceService.toString())
-            };
-        });
+        let edges = [];
+        if (aiAnalysis.aiGeneratedEdges && aiAnalysis.aiGeneratedEdges.length > 0) {
+            edges = aiAnalysis.aiGeneratedEdges.map((e, idx) => ({
+                id: `ai-edge-${idx}`,
+                source: e.source,
+                target: e.target,
+                label: e.label || 'AI DETECTED',
+                is_failure_path: true,
+                is_ai_predicted: true
+            }));
+        } else {
+            edges = dependencies.map(d => {
+                const isPropagationPath = (rootServiceId && (
+                    d.sourceService.toString() === rootServiceId.toString() ||
+                    finalImpactedList.includes(d.sourceService.toString())
+                )) || aiPropagationIds.includes(d.sourceService.toString());
+    
+                return {
+                    id: d._id.toString(),
+                    source: d.sourceService.toString(),
+                    target: d.dependentService.toString(),
+                    label: d.dependencyType,
+                    is_failure_path: isPropagationPath,
+                    is_ai_predicted: aiPropagationIds.includes(d.sourceService.toString())
+                };
+            });
+        }
 
         // 6. Filter to only show relevant subgraph (Optional, but helps focus)
         // For now, let's show everything but highlighted, as per usual topology views
@@ -293,11 +316,14 @@ exports.getIncidentTopology = async (req, res) => {
             edges, 
             incident_title: incident?.title,
             ai_analysis: aiAnalysis.analysis,
-            ai_confidence: aiAnalysis.confidence
+            ai_confidence: aiAnalysis.confidence,
+            suggested_fix: incident?.aiSuggestedFix,
+            suggested_doc_id: aiAnalysis.suggestedDocId
         });
     } catch (error) {
         console.error('Incident Topology Error:', error);
-        res.status(500).json({ message: 'Error fetching incident topology' });
+        require('fs').writeFileSync(__dirname + '/../top-error.txt', error.stack || error.toString());
+        res.status(500).json({ message: 'Error fetching incident topology', error: error.message });
     }
 };
 

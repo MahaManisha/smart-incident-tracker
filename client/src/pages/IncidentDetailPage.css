@@ -204,6 +204,10 @@
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 1px;
+  width: auto;
+  height: auto;
+  display: inline-flex;
+  white-space: nowrap;
 }
 
 .escalation-badge.level-1 { background: rgba(0, 243, 255, 0.1); color: var(--accent-cyan); border: 1px solid var(--accent-cyan); }

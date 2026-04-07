@@ -1,4 +1,4 @@
-/* CommentSection.css - Premium Glassmorphism */
+/* CommentSection.css - Infinitum Cyber Theme */
 
 .comment-section {
   margin-top: var(--spacing-xl);
@@ -8,18 +8,30 @@
 .comment-form {
   padding: 24px;
   margin-bottom: var(--spacing-2xl);
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(10px);
-  border-radius: 16px;
-  border: 1px dashed rgba(226, 232, 240, 0.8);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border-radius: 4px;
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
+  position: relative;
+  overflow: hidden;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.comment-form::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--primary-color);
+}
+
 .comment-form:focus-within {
-  background: rgba(255, 255, 255, 0.9);
-  border-style: solid;
-  border-color: var(--blue-300);
-  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.05);
+  background: rgba(10, 10, 15, 0.95);
+  border-color: var(--primary-color);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 0, 127, 0.2);
   transform: translateY(-2px);
 }
 
@@ -29,6 +41,11 @@
   box-shadow: none !important;
   font-size: 0.95rem;
   padding: 0;
+  color: var(--text-primary);
+}
+
+.comment-form textarea::placeholder {
+  color: rgba(255, 255, 255, 0.3);
 }
 
 .comment-form-footer {
@@ -37,7 +54,7 @@
   align-items: center;
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px solid rgba(226, 232, 240, 0.5);
+  border-top: 1px solid var(--border-color);
 }
 
 .comments-list {
@@ -48,17 +65,19 @@
 
 .comment-item {
   padding: 20px;
-  background: rgba(255, 255, 255, 0.85);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
-  border-radius: 16px;
-  border-left: 4px solid var(--blue-500);
+  background: rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--accent-cyan);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .comment-item:hover {
   transform: translateX(4px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05);
-  background: white;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 243, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--accent-cyan);
 }
 
 .comment-header {
@@ -77,15 +96,17 @@
 .author-avatar {
   width: 40px;
   height: 40px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, var(--blue-500), var(--indigo-600));
-  color: white;
+  border-radius: 4px;
+  background: linear-gradient(135deg, var(--accent-cyan), #0044ff);
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-family: var(--font-heading);
   font-weight: 800;
-  font-size: 0.95rem;
-  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2);
+  font-size: 1rem;
+  box-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .author-info {
@@ -94,16 +115,18 @@
 }
 
 .author-name {
-  font-size: 0.95rem;
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  letter-spacing: 1px;
   font-weight: 800;
-  color: var(--slate-900);
+  color: var(--text-primary);
   line-height: 1.2;
 }
 
 .comment-time {
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--slate-400);
+  color: var(--text-tertiary);
   margin-top: 2px;
 }
 
@@ -113,7 +136,7 @@
 
 .comment-content p {
   font-size: 0.95rem;
-  color: var(--slate-700);
+  color: var(--text-secondary);
   line-height: 1.6;
   margin: 0;
   white-space: pre-wrap;
@@ -122,12 +145,13 @@
 .empty-state-small {
   text-align: center;
   padding: 40px;
-  background: rgba(248, 250, 252, 0.5);
-  border-radius: 16px;
-  border: 1px dashed rgba(226, 232, 240, 0.8);
-  color: var(--slate-400);
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  border: 1px dashed var(--border-color);
+  color: var(--text-tertiary);
   font-size: 0.95rem;
   font-style: italic;
+  font-family: var(--font-sans);
 }
 
 /* Responsive */
@@ -136,4 +160,4 @@
     padding-left: 0;
     margin-top: 16px;
   }
-}
+}

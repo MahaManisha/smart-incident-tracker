@@ -67,6 +67,15 @@
   outline: none;
 }
 
+.form-input-premium::placeholder, .form-textarea-premium::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.form-select-premium option {
+  background-color: var(--bg-secondary, #0a0a0f);
+  color: #fff;
+}
+
 .input-with-icon {
   position: relative;
   display: flex;
