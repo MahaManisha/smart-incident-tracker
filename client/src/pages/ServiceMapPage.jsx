@@ -18,7 +18,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { 
     FaServer, FaInfoCircle, FaLink, FaProjectDiagram, FaExclamationTriangle, 
     FaArrowRight, FaUser, FaClock, FaBug, FaSkullCrossbones, FaBolt, FaPlay, FaLongArrowAltRight,
-    FaHistory, FaStop
+    FaHistory, FaStop, FaChevronDown, FaRobot
 } from 'react-icons/fa';
 import { getIncidentTimeline } from '../api/incidentApi';
 import Button from '../components/common/Button';
@@ -49,6 +49,7 @@ const ServiceMapPage = () => {
     const [selectedIncident, setSelectedIncident] = useState(''); // Stores Incident ID
     const [aiAnalysis, setAiAnalysis] = useState(null);
     const [error, setError] = useState(null);
+    const [aiExpanded, setAiExpanded] = useState(true);
 
     // Replay State
     const [isReplaying, setIsReplaying] = useState(false);
@@ -393,30 +394,31 @@ const ServiceMapPage = () => {
                                 <Controls />
                             </ReactFlow>
 
-                            {/* ChatGPT AI Intelligence Overlay */}
+                            {/* AI Intelligence Overlay — bottom-left collapsible */}
                             {aiAnalysis && (
-                                <div className="ai-insight-overlay slide-down">
-                                    <div className="ai-overlay-header">
-                                        <FaBolt className="text-primary-color" />
-                                        <h3>AI INCIDENT INSIGHTS</h3>
+                                <div className="ai-insight-overlay">
+                                    <div
+                                        className="ai-overlay-header"
+                                        onClick={() => setAiExpanded(p => !p)}
+                                        title={aiExpanded ? 'Collapse' : 'Expand'}
+                                    >
+                                        <FaRobot style={{ color: 'var(--primary-color)', fontSize: '0.9rem' }} />
+                                        <h3>AI Incident Insights</h3>
+                                        <FaChevronDown className={`ai-overlay-chevron ${aiExpanded ? 'open' : ''}`} />
                                     </div>
-                                    <div className="ai-overlay-body">
+                                    <div className={`ai-overlay-body ${aiExpanded ? '' : 'collapsed'}`}>
                                         <p className="ai-analysis-text">{aiAnalysis.analysis}</p>
                                         
                                         {aiAnalysis.suggested_fix && (
-                                            <div className="ai-fix mt-3">
-                                                <h4 className="text-accent-cyan flex items-center gap-2 mb-1">
-                                                    <FaBug /> AI Suggested Fix
-                                                </h4>
-                                                <p className="text-sm italic">{aiAnalysis.suggested_fix}</p>
+                                            <div className="ai-fix">
+                                                <h4><FaBug /> AI Suggested Fix</h4>
+                                                <p>{aiAnalysis.suggested_fix}</p>
                                             </div>
                                         )}
                                         
                                         {aiAnalysis.suggested_doc_id ? (
                                             <div className="ai-doc-link mt-3 pt-3 border-t border-white/10">
-                                                <h4 className="flex items-center gap-2 mb-1 text-green-400">
-                                                    <FaInfoCircle /> Documentation Found
-                                                </h4>
+                                                <h4><FaInfoCircle /> Documentation Found</h4>
                                                 <Link to={`/knowledge-base`} className="text-xs neon-text underline">
                                                     View Knowledge Base Document #{aiAnalysis.suggested_doc_id}
                                                 </Link>

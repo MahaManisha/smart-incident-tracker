@@ -109,6 +109,13 @@ const DashboardPage = () => {
     return (
       <Layout>
         <div className="dashboard-page">
+          <div className="cyber-dashboard-bg">
+            <div className="cyber-grid"></div>
+            <div className="glow-orb orb-1"></div>
+            <div className="glow-orb orb-2"></div>
+            <div className="scanlines"></div>
+          </div>
+          
           <div className="page-header">
             <h1 className="page-title">My Dashboard</h1>
             <p className="page-description">
@@ -152,6 +159,13 @@ const DashboardPage = () => {
   return (
     <Layout>
       <div className="dashboard-page">
+        <div className="cyber-dashboard-bg">
+          <div className="cyber-grid"></div>
+          <div className="glow-orb orb-1"></div>
+          <div className="glow-orb orb-2"></div>
+          <div className="scanlines"></div>
+        </div>
+
         <div className="page-header">
           <h1 className="page-title">Incident Analytics</h1>
           <p className="page-description">

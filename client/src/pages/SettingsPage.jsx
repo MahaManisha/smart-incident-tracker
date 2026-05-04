@@ -10,6 +10,7 @@ import {
 import { useSettings } from '../contexts/SettingsContext';
 import { useAuth } from '../contexts/AuthContext';
 import './SettingsPage.css';
+import { API_BASE_URL } from '../utils/constants';
 
 const SettingsPage = () => {
     const { settings, updateSettings } = useSettings();
@@ -31,7 +32,7 @@ const SettingsPage = () => {
             setIsLoggingOut(true);
             const token = localStorage.getItem('token');
             // Optimistic UI? No, wait for confirmation
-            const response = await fetch('http://localhost:5000/api/users/logout-all', {
+            const response = await fetch(`${API_BASE_URL}/users/logout-all`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,

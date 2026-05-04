@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axiosInstance from '../../api/axiosConfig';
 import TimelineItem from './TimelineItem';
 import LoadingSpinner from '../common/LoadingSpinner';
 import './IncidentTimeline.css';
@@ -14,9 +14,7 @@ const IncidentTimeline = ({ incidentId, refreshTrigger }) => {
             try {
                 setLoading(true);
                 const token = localStorage.getItem('token');
-                const response = await axios.get(`/api/incidents/${incidentId}/timeline`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                const response = await axiosInstance.get(`/incidents/${incidentId}/timeline`);
                 setEvents(response.data);
                 setError(null);
             } catch (err) {
