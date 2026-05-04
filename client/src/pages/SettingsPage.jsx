@@ -9,8 +9,8 @@ import {
 } from 'react-icons/fa';
 import { useSettings } from '../contexts/SettingsContext';
 import { useAuth } from '../contexts/AuthContext';
-import './SettingsPage.css';
 import { API_BASE_URL } from '../utils/constants';
+import './SettingsPage.css';
 
 const SettingsPage = () => {
     const { settings, updateSettings } = useSettings();

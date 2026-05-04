@@ -22,7 +22,10 @@ import {
   FaCalendarCheck,
   FaBook
 } from 'react-icons/fa';
+import { API_BASE_URL } from '../utils/constants';
 import './IncidentKnowledgeBasePage.css';
+
+const UPLOADS_BASE_URL = API_BASE_URL.replace(/\/api\/?$/, '');
 
 const IncidentKnowledgeBasePage = () => {
   const { user, hasRole } = useAuth();
@@ -334,7 +337,7 @@ const IncidentKnowledgeBasePage = () => {
                                   </span>
                                 </div>
                                 <a
-                                  href={`http://localhost:5000/${attachment.path}`}
+                                  href={`${UPLOADS_BASE_URL}/${attachment.path}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="attachment-download"

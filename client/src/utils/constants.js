@@ -65,7 +65,10 @@ export const DATETIME_FORMAT = 'MMM dd, yyyy HH:mm';
 export const TIME_FORMAT = 'HH:mm';
 
 // API Endpoints
-export const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+const envUrl = import.meta.env.VITE_API_URL;
+export const API_BASE_URL = envUrl 
+  ? (envUrl.endsWith('/api') ? envUrl : `${envUrl}/api`) 
+  : '/api';
 
 // Toast Messages
 export const TOAST_MESSAGES = {

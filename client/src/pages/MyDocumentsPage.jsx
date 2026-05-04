@@ -6,7 +6,10 @@ import { toast } from 'react-toastify';
 import { FaEye, FaEdit, FaTrash, FaCloudUploadAlt, FaSearch } from 'react-icons/fa';
 import { getMyDocuments, uploadDocument, updateDocument, deleteDocument } from '../api/myDocumentsApi';
 import { getAllIncidents } from '../api/incidentApi';
+import { API_BASE_URL } from '../utils/constants';
 import './MyDocumentsPage.css';
+
+const UPLOADS_BASE_URL = API_BASE_URL.replace(/\/api\/?$/, '');
 
 const MyDocumentsPage = () => {
     const navigate = useNavigate();
@@ -274,7 +277,7 @@ const MyDocumentsPage = () => {
                                             )}
                                         </td>
                                         <td className="doc-actions">
-                                            <a href={`http://localhost:5000${doc.file_path}`} target="_blank" rel="noopener noreferrer" className="action-btn" title="View Document">
+                                            <a href={`${UPLOADS_BASE_URL}${doc.file_path}`} target="_blank" rel="noopener noreferrer" className="action-btn" title="View Document">
                                                 <FaEye />
                                             </a>
                                             {!doc.deleted_at && !doc.is_knowledge_base && (

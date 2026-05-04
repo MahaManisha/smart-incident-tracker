@@ -11,9 +11,11 @@ import { toast } from 'react-toastify';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { FaReply, FaImage, FaTimes } from 'react-icons/fa';
+import { API_BASE_URL } from '../utils/constants';
 import './ChatPage.css';
 
-const SOCKET_URL = 'http://localhost:5000'; // Adjust if env var differs
+// Extract base URL for socket connection by removing /api if present
+const SOCKET_URL = API_BASE_URL.replace(/\/api\/?$/, '') || '/';
 
 const ChatPage = () => {
     const { teamId } = useParams();

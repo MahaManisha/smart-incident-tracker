@@ -6,7 +6,10 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { createDocumentation, getDocumentationByIncidentId, updateDocumentation } from '../../api/documentationApi';
 import { useAuth } from '../../contexts/AuthContext';
 import { formatDateTime } from '../../utils/formatters';
+import { API_BASE_URL } from '../../utils/constants';
 import './IncidentDocuments.css';
+
+const UPLOADS_BASE_URL = API_BASE_URL.replace(/\/api\/?$/, '');
 
 const IncidentDocuments = ({ incidentId, isResolved, canEdit }) => {
     const { user } = useAuth();
@@ -204,7 +207,7 @@ const IncidentDocuments = ({ incidentId, isResolved, canEdit }) => {
                                         <div className="attachment-name" title={file.name}>{file.name}</div>
                                         <div className="attachment-size">{(file.size / 1024 / 1024).toFixed(2)} MB</div>
                                     </div>
-                                    <a href={`http://localhost:5000/${file.path}`} target="_blank" rel="noopener noreferrer" className="download-btn">
+                                    <a href={`${UPLOADS_BASE_URL}/${file.path}`} target="_blank" rel="noopener noreferrer" className="download-btn">
                                         <FaDownload />
                                     </a>
                                 </div>

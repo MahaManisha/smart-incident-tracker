@@ -13,9 +13,8 @@ const IncidentTimeline = ({ incidentId, refreshTrigger }) => {
         const fetchTimeline = async () => {
             try {
                 setLoading(true);
-                const token = localStorage.getItem('token');
                 const response = await axiosInstance.get(`/incidents/${incidentId}/timeline`);
-                setEvents(response.data);
+                setEvents(response.data || response);
                 setError(null);
             } catch (err) {
                 console.error('Failed to fetch timeline:', err);

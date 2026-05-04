@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import io from 'socket.io-client';
 import { useAuth } from './AuthContext';
+import { API_BASE_URL } from '../utils/constants';
 
 const SocketContext = createContext();
 
@@ -17,9 +18,7 @@ export const SocketProvider = ({ children }) => {
 
         if (user && token) {
             // Initialize socket connection
-            // Use relative path or env var for URL. In dev, usually localhost:5000
-            // If proxy is set up in vite config, '/' works.
-            const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const SOCKET_URL = API_BASE_URL.replace(/\/api\/?$/, '') || '/';
 
             newSocket = io(SOCKET_URL, {
                 auth: { token },

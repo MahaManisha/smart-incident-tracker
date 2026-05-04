@@ -3,6 +3,7 @@ import { useAuth } from './AuthContext';
 import axiosInstance from '../api/axiosConfig';
 import { io } from 'socket.io-client';
 import { toast } from 'react-toastify';
+import { API_BASE_URL } from '../utils/constants';
 
 const NotificationContext = createContext();
 
@@ -33,7 +34,8 @@ export const NotificationProvider = ({ children }) => {
       fetchNotifications();
 
       // Connect Socket
-      const newSocket = io('http://localhost:5000'); // Ensure matches backend
+      const SOCKET_URL = API_BASE_URL.replace(/\/api\/?$/, '') || '/';
+      const newSocket = io(SOCKET_URL);
       setSocket(newSocket);
 
       // Join user specific room to receive personalized notifications
