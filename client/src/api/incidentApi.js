@@ -1,39 +1,40 @@
 import axiosInstance from './axiosConfig';
+import { API } from './config';
 
 // Get all incidents with filters
 export const getAllIncidents = async (params = {}) => {
   const queryString = new URLSearchParams(params).toString();
-  const response = await axiosInstance.get(`/api/incidents?${queryString}`);
+  const response = await axiosInstance.get(`${API}/api/incidents?${queryString}`);
   return response;
 };
 
 // Get single incident by ID
 export const getIncidentById = async (id) => {
-  const response = await axiosInstance.get(`/api/incidents/${id}`);
+  const response = await axiosInstance.get(`${API}/api/incidents/${id}`);
   return response;
 };
 
 // Create new incident
 export const createIncident = async (incidentData) => {
-  const response = await axiosInstance.post('/api/incidents', incidentData);
+  const response = await axiosInstance.post(`${API}/api/incidents`, incidentData);
   return response;
 };
 
 // Update incident
 export const updateIncident = async (id, incidentData) => {
-  const response = await axiosInstance.patch(`/api/incidents/${id}`, incidentData);
+  const response = await axiosInstance.patch(`${API}/api/incidents/${id}`, incidentData);
   return response;
 };
 
 // Delete incident
 export const deleteIncident = async (id) => {
-  const response = await axiosInstance.delete(`/api/incidents/${id}`);
+  const response = await axiosInstance.delete(`${API}/api/incidents/${id}`);
   return response;
 };
 
 // ✅ FIX: Changed from PATCH to PUT to match backend route
 export const assignIncident = async (id, responderId) => {
-  const response = await axiosInstance.put(`/api/incidents/${id}/assign`, {
+  const response = await axiosInstance.put(`${API}/api/incidents/${id}/assign`, {
     responderId,
   });
   return response;
@@ -41,7 +42,7 @@ export const assignIncident = async (id, responderId) => {
 
 // ✅ FIX: Changed from PATCH to PUT to match backend route
 export const updateIncidentStatus = async (id, status, notes, rootCause, resolutionNotes) => {
-  const response = await axiosInstance.put(`/api/incidents/${id}/status`, {
+  const response = await axiosInstance.put(`${API}/api/incidents/${id}/status`, {
     status,
     notes,
     rootCause,
@@ -52,7 +53,7 @@ export const updateIncidentStatus = async (id, status, notes, rootCause, resolut
 
 // Update incident priority (Admin/Responder only)
 export const updateIncidentPriority = async (id, priority) => {
-  const response = await axiosInstance.put(`/api/incidents/${id}/priority`, {
+  const response = await axiosInstance.put(`${API}/api/incidents/${id}/priority`, {
     priority,
   });
   return response;
@@ -60,26 +61,26 @@ export const updateIncidentPriority = async (id, priority) => {
 
 // Add comment to incident
 export const addComment = async (id, commentData) => {
-  const response = await axiosInstance.post(`/api/incidents/${id}/comments`, commentData);
+  const response = await axiosInstance.post(`${API}/api/incidents/${id}/comments`, commentData);
   return response;
 };
 
 // Get incident comments
 export const getIncidentComments = async (id) => {
-  const response = await axiosInstance.get(`/api/incidents/${id}/comments`);
+  const response = await axiosInstance.get(`${API}/api/incidents/${id}/comments`);
   return response;
 };
 
 // Escalate incident
 export const escalateIncident = async (id, escalationData) => {
-  const response = await axiosInstance.post(`/api/incidents/${id}/escalate`, escalationData);
+  const response = await axiosInstance.post(`${API}/api/incidents/${id}/escalate`, escalationData);
   return response;
 };
 
 // Get my incidents (for responders/reporters)
 export const getMyIncidents = async (params = {}) => {
   const queryString = new URLSearchParams(params).toString();
-  const response = await axiosInstance.get(`/api/incidents/my?${queryString}`);
+  const response = await axiosInstance.get(`${API}/api/incidents/my?${queryString}`);
   return response;
 };
 
@@ -116,7 +117,7 @@ export const createIncidentDocumentation = async (incidentId, formData) => {
  * @returns {Promise} API response with documentation data
  */
 export const getIncidentDocumentation = async (incidentId) => {
-  const response = await axiosInstance.get(`/api/incidents/${incidentId}/documentation`);
+  const response = await axiosInstance.get(`${API}/api/incidents/${incidentId}/documentation`);
   return response;
 };
 
@@ -127,55 +128,55 @@ export const getIncidentDocumentation = async (incidentId) => {
  */
 export const getResolvedIncidentsWithDocumentation = async (params = {}) => {
   const queryString = new URLSearchParams(params).toString();
-  const response = await axiosInstance.get(`/api/incidents/resolved/documentation?${queryString}`);
+  const response = await axiosInstance.get(`${API}/api/incidents/resolved/documentation?${queryString}`);
   return response;
 };
 
 // Get incident insights for decision support
 export const getIncidentInsights = async (id) => {
-  const response = await axiosInstance.get(`/api/incidents/${id}/insights`);
+  const response = await axiosInstance.get(`${API}/api/incidents/${id}/insights`);
   return response;
 };
 
 // SLA Prediction
 export const predictSlaBreach = async (id) => {
-  const response = await axiosInstance.get(`/api/incidents/${id}/predict-sla`);
+  const response = await axiosInstance.get(`${API}/api/incidents/${id}/predict-sla`);
   return response;
 };
 
 // KB Suggestions based on title (Backward compatibility)
 export const getKBSuggestions = async (title) => {
-  const response = await axiosInstance.get(`/api/incidents/kb/suggest?title=${encodeURIComponent(title)}`);
+  const response = await axiosInstance.get(`${API}/api/incidents/kb/suggest?title=${encodeURIComponent(title)}`);
   return response;
 };
 
 // AI Suggestions (Root Cause + Fix)
 export const getAISuggestions = async (id) => {
-  const response = await axiosInstance.get(`/api/incidents/${id}/ai-suggestions`);
+  const response = await axiosInstance.get(`${API}/api/incidents/${id}/ai-suggestions`);
   return response;
 };
 
 // Smart Assignment Suggestions
 export const getRecommendedResponders = async (id) => {
-  const response = await axiosInstance.get(`/api/incidents/${id}/recommended-responders`);
+  const response = await axiosInstance.get(`${API}/api/incidents/${id}/recommended-responders`);
   return response;
 };
 
 // Get Incident Event Timeline (for Replay)
 export const getIncidentTimeline = async (id) => {
-  const response = await axiosInstance.get(`/api/incidents/${id}/timeline`);
+  const response = await axiosInstance.get(`${API}/api/incidents/${id}/timeline`);
   return response;
 };
 
 // Auto Postmortem Report
 export const generatePostmortemReport = async (id) => {
-  const response = await axiosInstance.get(`/api/incidents/${id}/postmortem`);
+  const response = await axiosInstance.get(`${API}/api/incidents/${id}/postmortem`);
   return response;
 };
 
 // Auto Clustering (Admin Only)
 export const clusterIncidents = async () => {
-  const response = await axiosInstance.post('/api/incidents/cluster');
+  const response = await axiosInstance.post(`${API}/api/incidents/cluster`);
   return response;
 };
 

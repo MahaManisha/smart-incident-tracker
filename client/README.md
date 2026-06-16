@@ -1,16 +1,35 @@
-# React + Vite
+# 🛰️ Smart Incident Tracker — Client Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Welcome to the frontend app for the **Smart Incident Tracker (INFINITUM Edition)**.
 
-Currently, two official plugins are available:
+This is a reactive Single Page Application built using **React 19**, **Vite 7**, and structured modern CSS following the holographic cyberpunk "INFINITUM" theme.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Quick Start
 
-## React Compiler
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+2. Set up environment variables. Create a `.env` file in this directory:
+   ```env
+   VITE_API_URL=http://localhost:5000/api
+   ```
+3. Run the development server:
+   ```bash
+   npm run dev
+   ```
+4. Build for production:
+   ```bash
+   npm run build
+   ```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 🛠️ Main App Structure
+- **`src/api/`**: Integrates with the backend REST endpoints.
+- **`src/components/`**: Reusable modular widgets (such as the SLA tracker, custom loader, and system charts).
+- **`src/contexts/`**: Context state for Socket connection, Authentication, and live Notifications.
+- **`src/pages/`**: Includes 20+ specialized page views for incident reporting, analytics, calendars, and mapping.
+- **`src/styles/`**: Custom cyberpunk dark-mode themes, typography, custom scrollbars, and neon glows.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+For full architectural blueprints, API cheat sheets, and database schemas, please refer to the [Root README.md](../README.md).

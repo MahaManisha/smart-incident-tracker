@@ -1,12 +1,7 @@
 import axios from 'axios';
 
-// Ensure no quotes are accidentally included in the environment variable
-const envUrlRaw = import.meta.env.VITE_API_URL || '';
-const API = envUrlRaw.replace(/^["']|["']$/g, '');
-
 // Create axios instance
 const axiosInstance = axios.create({
-  baseURL: API,
   headers: {
     'Content-Type': 'application/json',
   },

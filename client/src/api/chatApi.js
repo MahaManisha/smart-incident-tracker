@@ -1,9 +1,10 @@
 import axiosInstance from './axiosConfig';
+import { API } from './config';
 
 // Get messages for a team
 export const getTeamMessages = async (teamId) => {
     try {
-        const response = await axiosInstance.get(`/api/messages/${teamId}`);
+        const response = await axiosInstance.get(`${API}/api/messages/${teamId}`);
         return response; // returns array of messages
     } catch (error) {
         throw error;
@@ -17,7 +18,7 @@ export const sendMessage = async (teamId, content, replyTo = null, image = null)
         if (replyTo) payload.replyTo = replyTo;
         if (image) payload.image = image;
         
-        const response = await axiosInstance.post(`/api/messages/${teamId}`, payload);
+        const response = await axiosInstance.post(`${API}/api/messages/${teamId}`, payload);
         return response.data || response;
     } catch (error) {
         throw error;
